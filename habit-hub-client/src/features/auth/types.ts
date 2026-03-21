@@ -1,11 +1,8 @@
+import type { User } from "../../types/user.ts";
+
 export interface LoginResponse {
     sessionId: string;
     user: User;
 }
 
-export interface User{
-    id:string;
-    name:string;
-    email:string;
-    timezone: string;
-}
+
