@@ -14,8 +14,8 @@ export const LoginForm: React.FC = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      // const response = await api.post('/auth/login', data);
-      // localStorage.setItem('sessionId', response.data.sessionId);
+      const response = await api.post('/auth/login', data);
+      localStorage.setItem('sessionId', response.data.sessionId);
       navigate('/dashboard');
     } catch (error) {
       console.error("Login error", error);

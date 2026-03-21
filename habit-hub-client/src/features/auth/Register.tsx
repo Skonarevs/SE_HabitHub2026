@@ -8,8 +8,8 @@ export const Register: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     try {
-    //   const response = await api.post('/auth/register', data);
-    //   localStorage.setItem('sessionId', response.data.sessionId);
+      const response = await api.post('/auth/register', data);
+      localStorage.setItem('sessionId', response.data.sessionId);
       navigate('/dashboard');
     } catch (error) {
       console.error("Registration error", error);
