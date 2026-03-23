@@ -6,10 +6,15 @@ import { Link } from 'react-router-dom';
 interface LoginFormInputs {
   email: string;
   password: string;
+  userType: 'Creator' | 'Member'; // added
 }
 
 export const LoginForm: React.FC = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>({
+    defaultValues: { // added
+      userType: 'Member', // added
+    } // added
+  });
   const navigate = useNavigate();
 
   const onSubmit = async (data: LoginFormInputs) => {
@@ -65,6 +70,18 @@ export const LoginForm: React.FC = () => {
            
           />
           {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
+        </div>
+
+        <div className="flex flex-col"> {/* added */}
+          <label className="text-sm font-medium text-gray-700 mb-1">I am logging in as</label> {/* added */}
+          <select
+            {...register("userType", { required: "Select a role" })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            <option value="Member">Member</option>
+            <option value="Creator">Creator</option>
+          </select>
+          {errors.userType && <p className="text-sm text-red-500 mt-1">{errors.userType.message}</p>}
         </div>
 
         {/* Button */}
