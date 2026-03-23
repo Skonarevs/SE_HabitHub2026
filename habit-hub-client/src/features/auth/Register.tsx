@@ -2,27 +2,29 @@ import { useForm } from 'react-hook-form';
 import api from '../../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
 
-interface RegisterFormInputs { // added
-  name: string; // added
-  email: string; // added
-  password: string; // added
-  timezone: string; // added
-  userType: 'Creator' | 'Member'; // added
-} // added
 
-export const Register: React.FC = () => { // slight reformating
-  const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; // added
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormInputs>({ // added
-    defaultValues: { // added
-      timezone: detectedTimezone, // added
-      userType: 'Member', // added
-    }, // added
-  }); // added
+interface RegisterFormInputs { 
+  name: string;
+  email: string; 
+  password: string;
+  timezone: string; 
+  userType: 'Creator' | 'Member'; 
+} 
+
+export const Register: React.FC = () => { 
+  const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; 
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormInputs>({ 
+    defaultValues: { 
+      timezone: detectedTimezone, 
+      userType: 'Member', 
+    }, 
+  }); 
   const navigate = useNavigate();
 
-  const onSubmit = async (data: RegisterFormInputs) => { // added RegisterFormInputs insead of any
+  const onSubmit = async (data: RegisterFormInputs) => {
+    
     try {
-      const response = await api.post<{ sessionId: string }>('/auth/register', data); // added respone type
+      const response = await api.post<{ sessionId: string }>('/auth/register', data);
       localStorage.setItem('sessionId', response.data.sessionId);
       navigate('/dashboard');
     } catch (error) {

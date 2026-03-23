@@ -6,14 +6,14 @@ import { Link } from 'react-router-dom';
 interface LoginFormInputs {
   email: string;
   password: string;
-  userType: 'Creator' | 'Member'; // added
+  userType: 'Creator' | 'Member'; 
 }
 
 export const LoginForm: React.FC = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>({
-    defaultValues: { // added
-      userType: 'Member', // added
-    } // added
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginFormInputs>({
+    defaultValues: { 
+      userType: 'Member', 
+    } 
   });
   const navigate = useNavigate();
 
@@ -22,9 +22,25 @@ export const LoginForm: React.FC = () => {
       const response = await api.post('/auth/login', data);
       localStorage.setItem('sessionId', response.data.sessionId);
       navigate('/dashboard');
-    } catch (error) {
-      console.error("Login error", error);
-    
+    } catch (error: any) {
+     
+    const serverMessage = error.response?.data?.message || "Something went wrong";
+    const status = error.response?.status;
+
+    if (status === 401 || status === 404) {
+      
+      setError("email", { 
+        type: "manual", 
+        message: serverMessage.includes("email") ? serverMessage : "Invalid email or password" 
+      });
+      setError("password", { 
+        type: "manual", 
+        message: serverMessage.includes("password") ? serverMessage : "Invalid email or password" 
+      });
+    } else {
+      
+      alert("Server is not responding. Please try again later.");
+    }
     }
   }
 
