@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build:
+      context: ./habit-hub-client
+    ports:
+      - "5173:80" 
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./habit-hub-server
+    ports:
+      - "5100:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
