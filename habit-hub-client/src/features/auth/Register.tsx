@@ -24,8 +24,9 @@ export const Register: React.FC = () => {
   const onSubmit = async (data: RegisterFormInputs) => {
     
     try {
-      const response = await api.post<{ sessionId: string }>('/auth/register', data);
+      const response = await api.post('/auth/register', data);
       localStorage.setItem('sessionId', response.data.sessionId);
+      localStorage.setItem('userName', response.data.name); 
       navigate('/dashboard');
     } catch (error) {
       console.error("Registration error", error);
