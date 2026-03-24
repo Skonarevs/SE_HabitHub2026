@@ -11,6 +11,6 @@ namespace HabitHub.API.Services.Interfaces
         Task InvalidateSessionAsync(Guid userId, Guid sessionId);
         //Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto);
         Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, Guid currentSessionId);
-        Task ChangeEmailAsync(Guid userId, ChangeEmailDto dto);
+        Task ChangeEmailAsync(Guid userId, ChangeEmailDto dto, Guid currentSessionId);
     }
 }

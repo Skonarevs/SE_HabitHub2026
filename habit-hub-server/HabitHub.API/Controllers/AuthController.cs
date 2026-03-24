@@ -67,7 +67,8 @@ namespace HabitHub.API.Controllers
         public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
         {
             var userId = User.GetUserId();
-            await _authService.ChangeEmailAsync(userId, dto);
+            var sessionId = Guid.Parse(User.FindFirst("SessionId")?.Value ?? throw new UnauthorizedAccessException());
+            await _authService.ChangeEmailAsync(userId, dto, sessionId);
             return Ok();
         }
     }
