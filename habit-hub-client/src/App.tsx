@@ -4,13 +4,19 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Register } from "./features/auth/Register";
 
 
-const Dashboard = () => (
+
+export const Dashboard = () => {
+ const name:string  = localStorage.getItem('userName') ?? 'User';
+  return(
   <div>
     <h1 className="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
-    <p className="text-gray-600">welcome to HabitHub!</p>
+    <p className="text-gray-600">{name}, welcome to HabitHub!</p>
   </div>
-)
+   );
+  }
+
 function App() {
+ 
   return (
   <Routes>
      
@@ -21,8 +27,8 @@ function App() {
       
      
         <Route path="/dashboard" element={<MainLayout />}>
-          <Route index element={<Dashboard />} />
-        </Route>
+          <Route index element={<Dashboard/>} />
+          </Route>
     </Routes>
   );
 }
