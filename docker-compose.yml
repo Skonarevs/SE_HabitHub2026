@@ -1,22 +1,27 @@
 services:
   frontend:
     build: ./habit-hub-client
+    container_name: habithub-client 
     ports:
-      - "5173:80"
+      - "3000:80"
 
   backend:
     build: ./habit-hub-server
+    container_name: HabitHub.API 
     ports:
-      - "5100:8080"
+      - "5000:8080"
+      - "5001:8081"
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=HabitHubDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
     depends_on:
       - db
     restart: always
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-server 
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=YourStrongPassword123!

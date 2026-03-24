@@ -1,6 +1,8 @@
 import { useForm } from 'react-hook-form';
 import api from '../../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 
 
 interface RegisterFormInputs { 
@@ -13,7 +15,7 @@ interface RegisterFormInputs {
 
 export const Register: React.FC = () => { 
   const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormInputs>({ 
+  const { register, handleSubmit, formState: { errors }, setError} = useForm<RegisterFormInputs>({ 
     defaultValues: { 
       timezone: detectedTimezone, 
       userType: 'Member', 
@@ -28,10 +30,42 @@ export const Register: React.FC = () => {
       localStorage.setItem('sessionId', response.data.sessionId);
       localStorage.setItem('userName', response.data.name); 
       navigate('/dashboard');
-    } catch (error) {
-      console.error("Registration error", error);
-    }
+    } catch (error: any) {
+  if (!error.response) {
+    toast.error("Server is not responding. Please try again later.");
+    return;
   }
+
+  const status = Number(error.response.status);
+  const serverMessage =
+    error.response.data?.error ||
+    error.response.data?.message ||
+    "Something went wrong";
+
+  switch (status) {
+    case 409:
+    setError("email", {
+      type: "server",
+      message: "User with this email already exists",
+    });
+    return;
+
+   case 400:
+   
+    toast.error(serverMessage);
+    return;
+   case 500:
+    toast.error("Server error. Please contact support.");
+   return;
+  default:
+    toast.error(`Unexpected error (${status})`);
+    return;
+}
+}
+}
+
+    
+  
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -42,7 +76,6 @@ export const Register: React.FC = () => {
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">HabitHub</h2>
         <p className="text-center text-gray-500 text-sm mb-4">Create an account</p>
 
-         {/* added */}
         <div className="flex flex-col"> 
           <label className="text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
@@ -75,6 +108,7 @@ export const Register: React.FC = () => {
             }`}
             placeholder="mail@example.com"
           />
+
           {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message?.toString()}</p>}
         </div>
 
@@ -89,7 +123,6 @@ export const Register: React.FC = () => {
           </select>
         </div>
 
-        {/* added */}
         <div className="flex flex-col">
           <label className="text-sm font-medium text-gray-700 mb-1">Timezone</label>
           <input

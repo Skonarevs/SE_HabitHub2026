@@ -2,55 +2,58 @@ import { useForm } from 'react-hook-form';
 import api from '../../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-interface LoginFormInputs {
+interface LoginInputs {
   email: string;
   password: string;
   userType: 'Creator' | 'Member'; 
 }
 
-export const LoginForm: React.FC = () => {
-  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginFormInputs>({
+export const Login: React.FC = () => {
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginInputs>({
     defaultValues: { 
       userType: 'Member', 
     } 
   });
   const navigate = useNavigate();
 
-  const onSubmit = async (data: LoginFormInputs) => {
+  const onSubmit = async (data: LoginInputs) => {
     try {
       const response = await api.post('/auth/login', data);
       localStorage.setItem('sessionId', response.data.sessionId);
       localStorage.setItem('userName', response.data.name); 
       navigate('/dashboard');
     } catch (error: any) {
-  console.log('FULL ERROR:', error);
-  console.log('RESPONSE:', error.response);
-  console.log('STATUS:', error.response?.status);
+  if (!error.response) {
+    toast.error("Server is not responding. Please try again later.");
+    return;
+  }
 
-    const serverMessage = error.response?.data?.message || "Something went wrong";
-    const status = Number(error.response?.status);
+  const status = Number(error.response.status);
+  const serverMessage =
+    error.response.data?.error || "Something went wrong";
 
-    if (status === 401 || status === 404) {
-      
-      setError("email", { 
-        type: "manual", 
-        message: serverMessage.includes("email") ? serverMessage : "Invalid email or password" 
-      });
-      setError("password", { 
-        type: "manual", 
-        message: serverMessage.includes("password") ? serverMessage : "Invalid email or password" 
-      });
-    } 
-    else if(status === 500){
-      console.error("Backend crashed:", serverMessage);
-      alert("Something went wrong on the server. Please contact support.");
-    }
-    else {
-      
-      alert("Server is not responding. Please try again later.");
-    }
-    }
+  if (status === 401 || status === 404) {
+    setError("email", {
+      type: "server",
+      message: serverMessage,
+    });
+
+    setError("password", {
+      type: "server",
+      message: serverMessage,
+    });
+
+    
+
+  } else if (status === 500) {
+    toast.error("Server error. Please contact support.");
+
+  } else {
+    toast.error(`Unexpected error (${status})`);
+  }
+}
   }
 
   return (

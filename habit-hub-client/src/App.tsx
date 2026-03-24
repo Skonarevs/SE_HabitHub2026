@@ -1,19 +1,10 @@
 import { MainLayout } from "./components/layout/MainLayout";
-import { LoginForm } from "./features/auth/LoginForm";
+import { Login } from "./features/auth/Login";
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Register } from "./features/auth/Register";
+import { Dashboard } from "./features/dashboard/Dashboard";
 
 
-
-export const Dashboard = () => {
- const name:string  = localStorage.getItem('userName') ?? 'User';
-  return(
-  <div>
-    <h1 className="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
-    <p className="text-gray-600">{name}, welcome to HabitHub!</p>
-  </div>
-   );
-  }
 
 function App() {
  
@@ -22,7 +13,7 @@ function App() {
      
       <Route path="/" element={<Navigate to="/login" replace />} />
     
-      <Route path="/login" element={<LoginForm />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
      
