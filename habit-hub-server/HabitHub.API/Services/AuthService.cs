@@ -29,7 +29,7 @@ namespace HabitHub.API.Services
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (existingUser != null)
             {
-                throw new Exception("Email already exists");
+                throw new ConflictException("Email already exists");
             }
                 
             User user;
@@ -55,7 +55,7 @@ namespace HabitHub.API.Services
             }
             else
             {
-                throw new Exception("Invalid user type");
+                throw new ValidationException("Invalid user type");
             }
 
             _context.Users.Add(user);
@@ -87,13 +87,13 @@ namespace HabitHub.API.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
             {
-                throw new Exception("Invalid credentials");
+                throw new InvalidCredentialsException("Invalid credentials");
             }
                 
             var result = _passwordHasher.VerifyHashedPassword(null, user.PasswordHash, dto.Password);
             if (result != PasswordVerificationResult.Success)
             {
-                throw new Exception("Invalid credentials");
+                throw new InvalidCredentialsException("Invalid credentials");
             }
 
             string actualType;
@@ -108,11 +108,11 @@ namespace HabitHub.API.Services
             }
             if (!actualType.Equals(dto.UserType, StringComparison.OrdinalIgnoreCase))
             {
-                throw new Exception("Invalid position");
+                throw new InvalidCredentialsException("Invalid credentials");
             }
  
 
-            // For now, craete a new session
+            // Craete a new session
             var session = new Session
             {
                 UserId = user.Id,
@@ -135,14 +135,35 @@ namespace HabitHub.API.Services
             };
         }
 
-        public Task<List<SessionInfoDto>> GetActiveSessionsAsync(Guid userId)
+        public async Task<List<SessionInfoDto>> GetActiveSessionsAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            var sessions = await _context.Sessions
+                .Where(s => s.UserId == userId && s.Status == SessionStatus.Active)
+                .Select(s => new SessionInfoDto
+                {
+                    SessionId = s.Id,
+                    CreatedAt = s.CreatedAt,
+                    LastActivity = s.LastActivity,
+                    ExpiryDate = s.ExpiryDate,
+                    Status = s.Status.ToString()
+                })
+                .ToListAsync();
+
+            return sessions;
         }
 
-        public Task InvalidateSessionAsync(Guid userId, Guid sessionId)
+        public async Task InvalidateSessionAsync(Guid userId, Guid sessionId)
         {
-            throw new NotImplementedException();
+            var session = await _context.Sessions
+                .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId);
+            if (session == null)
+            {
+                throw new NotFoundException("Session not found");
+            }
+                
+
+            session.Status = SessionStatus.Invalidated;
+            await _context.SaveChangesAsync();
         }
 
         public async Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, Guid currentSessionId)
@@ -175,9 +196,41 @@ namespace HabitHub.API.Services
             // TODO: Send notification email about password change
         }
 
-        public Task ChangeEmailAsync(Guid userId, ChangeEmailDto dto)
+        public async Task ChangeEmailAsync(Guid userId, ChangeEmailDto dto, Guid currentSessionId)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            var result = _passwordHasher.VerifyHashedPassword(null, user.PasswordHash, dto.Password);
+            if (result != PasswordVerificationResult.Success)
+            {
+                throw new InvalidCredentialsException("Password is incorrect");
+            }
+                
+
+            var emailExists = await _context.Users.AnyAsync(u => u.Email == dto.NewEmail && u.Id != userId);
+            if (emailExists)
+            {
+                throw new ConflictException("Email already exists");
+            }
+
+            var oldEmail = user.Email;
+            user.Email = dto.NewEmail;
+
+            var otherSessions = await _context.Sessions
+                .Where(s => s.UserId == userId && s.Id != currentSessionId && s.Status == SessionStatus.Active)
+                .ToListAsync();
+            foreach (var session in otherSessions)
+            {
+                session.Status = SessionStatus.Invalidated;
+            }
+
+            await _context.SaveChangesAsync();
+
+            // TODO: Send notification to old and new email addresses
         }
     }
 }
