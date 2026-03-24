@@ -3,6 +3,8 @@ import { Login } from "./features/auth/Login";
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Register } from "./features/auth/Register";
 import { Dashboard } from "./features/dashboard/Dashboard";
+import { ProtectedRoute } from "./features/auth/ProtectedRoute";
+import { PublicRoute } from "./features/auth/PublicRoute";
 
 
 
@@ -13,11 +15,11 @@ function App() {
      
       <Route path="/" element={<Navigate to="/login" replace />} />
     
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       
      
-        <Route path="/dashboard" element={<MainLayout />}>
+        <Route path="/dashboard" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} >
           <Route index element={<Dashboard/>} />
           </Route>
     </Routes>
