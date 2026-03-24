@@ -21,11 +21,15 @@ export const LoginForm: React.FC = () => {
     try {
       const response = await api.post('/auth/login', data);
       localStorage.setItem('sessionId', response.data.sessionId);
+      localStorage.setItem('userName', response.data.name); 
       navigate('/dashboard');
     } catch (error: any) {
-     
+  console.log('FULL ERROR:', error);
+  console.log('RESPONSE:', error.response);
+  console.log('STATUS:', error.response?.status);
+
     const serverMessage = error.response?.data?.message || "Something went wrong";
-    const status = error.response?.status;
+    const status = Number(error.response?.status);
 
     if (status === 401 || status === 404) {
       
@@ -37,7 +41,12 @@ export const LoginForm: React.FC = () => {
         type: "manual", 
         message: serverMessage.includes("password") ? serverMessage : "Invalid email or password" 
       });
-    } else {
+    } 
+    else if(status === 500){
+      console.error("Backend crashed:", serverMessage);
+      alert("Something went wrong on the server. Please contact support.");
+    }
+    else {
       
       alert("Server is not responding. Please try again later.");
     }
@@ -82,7 +91,7 @@ export const LoginForm: React.FC = () => {
               errors.password 
                 ? 'border-red-500 focus:ring-2 focus:ring-red-200' 
                 : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-            }`}
+            } minLength: { value: 8, message: "Minimum 8 characters" }`} 
            
           />
           {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}

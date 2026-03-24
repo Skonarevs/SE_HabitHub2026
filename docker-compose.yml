@@ -12,8 +12,8 @@ services:
       - ConnectionStrings__DefaultConnection=Server=db;Database=HabitHubDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      db: 
-        condition: service_healthy
+      - db
+    restart: always
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest

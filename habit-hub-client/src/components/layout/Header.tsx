@@ -8,6 +8,7 @@ export const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('sessionId');
+    localStorage.removeItem('userName');
     setShowConfirm(false);
     navigate('/login');
   };
