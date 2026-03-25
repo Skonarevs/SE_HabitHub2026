@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { LogOut, LayoutDashboard, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export const Header = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
-
+ const logout = useAuthStore((state) => state.logout);
   const handleLogout = () => {
-    localStorage.removeItem('sessionId');
-    localStorage.removeItem('userName');
+    logout();
     setShowConfirm(false);
     navigate('/login');
   };

@@ -3,6 +3,7 @@ import api from '../../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface LoginInputs {
   email: string;
@@ -17,12 +18,11 @@ export const Login: React.FC = () => {
     } 
   });
   const navigate = useNavigate();
-
+const login = useAuthStore((state) => state.login);
   const onSubmit = async (data: LoginInputs) => {
     try {
       const response = await api.post('/auth/login', data);
-      localStorage.setItem('sessionId', response.data.sessionId);
-      localStorage.setItem('userName', response.data.name); 
+      login(response.data.name, response.data.sessionId);
       navigate('/dashboard');
     } catch (error: any) {
   if (!error.response) {
@@ -31,8 +31,7 @@ export const Login: React.FC = () => {
   }
 
   const status = Number(error.response.status);
-  const serverMessage =
-    error.response.data?.error || "Something went wrong";
+  const serverMessage = error.response.data?.error || "Something went wrong";
 
   if (status === 401 || status === 404) {
     setError("email", {
