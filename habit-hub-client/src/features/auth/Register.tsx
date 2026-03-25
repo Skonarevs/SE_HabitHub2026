@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import api from '../../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuthStore } from '../../store/useAuthStore';
 
 
 
@@ -22,13 +23,12 @@ export const Register: React.FC = () => {
     }, 
   }); 
   const navigate = useNavigate();
-
+  const login = useAuthStore((state) => state.login);
   const onSubmit = async (data: RegisterFormInputs) => {
     
     try {
       const response = await api.post('/auth/register', data);
-      localStorage.setItem('sessionId', response.data.sessionId);
-      localStorage.setItem('userName', response.data.name); 
+      login(response.data.name, response.data.sessionId);
       navigate('/dashboard');
     } catch (error: any) {
   if (!error.response) {
@@ -39,14 +39,13 @@ export const Register: React.FC = () => {
   const status = Number(error.response.status);
   const serverMessage =
     error.response.data?.error ||
-    error.response.data?.message ||
     "Something went wrong";
 
   switch (status) {
     case 409:
     setError("email", {
       type: "server",
-      message: "User with this email already exists",
+      message: serverMessage,
     });
     return;
 
