@@ -1,13 +1,18 @@
-
+﻿
 using HabitHub.Data;
+using HabitHub.Models.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.Extensions.DependencyInjection;
 
 
 namespace HabitHub.ApiTests
@@ -20,7 +25,6 @@ namespace HabitHub.ApiTests
             var factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
-                    // Replace the real database with an in-memory one
                     builder.ConfigureServices(services =>
                     {
                         var descriptor = services.SingleOrDefault(
@@ -38,6 +42,7 @@ namespace HabitHub.ApiTests
 
             _client = factory.CreateClient();
         }
+
 
 
         [Fact]
@@ -194,8 +199,6 @@ namespace HabitHub.ApiTests
 
             Assert.Equal(System.Net.HttpStatusCode.Unauthorized, response.StatusCode);
         }
-
-
 
 
 

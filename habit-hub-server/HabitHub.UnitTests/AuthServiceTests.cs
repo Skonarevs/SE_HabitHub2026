@@ -284,5 +284,181 @@ namespace HabitHub.UnitTests
                 service.InvalidateSessionAsync(Guid.NewGuid(), Guid.NewGuid()));
         }
 
+
+
+        [Fact]
+        public async Task ChangePasswordAsync_ShouldChangePassword_AndInvalidateOtherSessions()
+        {
+            var context = GetDbContext();
+            var service = GetService(context);
+
+            var user = CreateTestCreator("test@test.com", "OldPassword");
+            context.Users.Add(user);
+
+            var currentSession = new Session
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Status = SessionStatus.Active
+            };
+
+            var otherSession = new Session
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Status = SessionStatus.Active
+            };
+
+            context.Sessions.AddRange(currentSession, otherSession);
+            await context.SaveChangesAsync();
+
+            var dto = new ChangePasswordDto
+            {
+                CurrentPassword = "OldPassword",
+                NewPassword = "NewPassword123!"
+            };
+
+            await service.ChangePasswordAsync(user.Id, dto, currentSession.Id);
+
+            var updatedUser = await context.Users.FindAsync(user.Id);
+            var hasher = new PasswordHasher<User>();
+
+            var verify = hasher.VerifyHashedPassword(null, updatedUser.PasswordHash, "NewPassword123!");
+            Assert.Equal(PasswordVerificationResult.Success, verify);
+
+            var sessions = await context.Sessions.ToListAsync();
+
+            Assert.Contains(sessions, s => s.Id == otherSession.Id && s.Status == SessionStatus.Invalidated);
+            Assert.Contains(sessions, s => s.Id == currentSession.Id && s.Status == SessionStatus.Active);
+        }
+
+
+        [Fact]
+        public async Task ChangePasswordAsync_ShouldThrow_WhenCurrentPasswordIncorrect()
+        {
+            var context = GetDbContext();
+            var service = GetService(context);
+
+            var user = CreateTestCreator("test@test.com", "CorrectPassword");
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+
+            var dto = new ChangePasswordDto
+            {
+                CurrentPassword = "WrongPassword",
+                NewPassword = "NewPassword123!"
+            };
+
+            await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
+                service.ChangePasswordAsync(user.Id, dto, Guid.NewGuid()));
+        }
+
+
+        [Fact]
+        public async Task ChangeEmailAsync_ShouldChangeEmail_AndInvalidateOtherSessions()
+        {
+            var context = GetDbContext();
+            var service = GetService(context);
+
+            var user = CreateTestCreator("old@test.com", "Password123!");
+            context.Users.Add(user);
+
+            var currentSession = new Session
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Status = SessionStatus.Active
+            };
+
+            var otherSession = new Session
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Status = SessionStatus.Active
+            };
+
+            context.Sessions.AddRange(currentSession, otherSession);
+            await context.SaveChangesAsync();
+
+            var dto = new ChangeEmailDto
+            {
+                Password = "Password123!",
+                NewEmail = "new@test.com"
+            };
+
+            await service.ChangeEmailAsync(user.Id, dto, currentSession.Id);
+
+            var updatedUser = await context.Users.FindAsync(user.Id);
+            Assert.Equal("new@test.com", updatedUser.Email);
+
+
+            var sessions = await context.Sessions.ToListAsync();
+
+            Assert.Contains(sessions, s => s.Id == otherSession.Id && s.Status == SessionStatus.Invalidated);
+            Assert.Contains(sessions, s => s.Id == currentSession.Id && s.Status == SessionStatus.Active);
+        }
+
+        [Fact]
+        public async Task ChangeEmailAsync_ShouldThrow_WhenPasswordIncorrect()
+        {
+            var context = GetDbContext();
+            var service = GetService(context);
+
+            var user = CreateTestCreator("test@test.com", "CorrectPassword");
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+
+            var dto = new ChangeEmailDto
+            {
+                Password = "WrongPassword",
+                NewEmail = "new@test.com"
+            };
+
+            await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
+                service.ChangeEmailAsync(user.Id, dto, Guid.NewGuid()));
+        }
+
+
+
+        [Fact]
+        public async Task ChangeEmailAsync_ShouldThrow_WhenEmailAlreadyExists()
+        {
+            var context = GetDbContext();
+            var service = GetService(context);
+
+            var user1 = CreateTestCreator("user1@test.com", "Password123!");
+            var user2 = CreateTestCreator("user2@test.com", "Password123!");
+
+            context.Users.AddRange(user1, user2);
+            await context.SaveChangesAsync();
+
+            var dto = new ChangeEmailDto
+            {
+                Password = "Password123!",
+                NewEmail = "user2@test.com"
+            };
+
+            await Assert.ThrowsAsync<ConflictException>(() =>
+                service.ChangeEmailAsync(user1.Id, dto, Guid.NewGuid()));
+        }
+
+
+
+
+        [Fact]
+        public async Task ChangeEmailAsync_ShouldThrow_WhenUserNotFound()
+        {
+            var context = GetDbContext();
+            var service = GetService(context);
+
+            var dto = new ChangeEmailDto
+            {
+                Password = "pass",
+                NewEmail = "new@test.com"
+            };
+
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                service.ChangeEmailAsync(Guid.NewGuid(), dto, Guid.NewGuid()));
+        }
     }
 }
