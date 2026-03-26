@@ -1,12 +1,17 @@
 services:
   frontend:
-    build: ./habit-hub-client
+    build:
+      context: ./habit-hub-client
+      dockerfile: Dockerfile
     container_name: habithub-client 
     ports:
       - "3000:80"
+    restart: unless-stopped
 
   backend:
-    build: ./habit-hub-server
+    build:
+      context: ./habit-hub-server
+      dockerfile: Dockerfile
     container_name: HabitHub.API 
     ports:
       - "5000:8080"
@@ -16,8 +21,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
     depends_on:
-      - db
-    restart: always
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -27,3 +33,15 @@ services:
       - MSSQL_SA_PASSWORD=YourStrongPassword123!
     ports:
       - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  sqlserver-data:
