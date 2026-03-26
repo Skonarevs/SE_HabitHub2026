@@ -19,19 +19,36 @@ namespace HabitHub.UnitTests
             return new AuthService(context, passwordHasher);
         }
 
+
         private AppDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDb")
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             return new AppDbContext(options);
         }
 
+
+        private TeamCreator CreateTestCreator(string email, string password)
+        {
+            var hasher = new PasswordHasher<User>();
+
+            return new TeamCreator
+            {
+                Name = "Test",
+                Email = email,
+                Timezone = "UTC",
+                PasswordHash = hasher.HashPassword(null, password)
+            };
+        }
+
+
+
         [Fact]
         public async Task RegisterAsync_ShouldCreateUser_WhenEmailIsUnique()
         {
-            // Arrange
+
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -44,10 +61,10 @@ namespace HabitHub.UnitTests
                 Timezone = "UTC"
             };
 
-            // Act
+
             var result = await service.RegisterAsync(dto);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Equal(dto.Email, result.Email);
 
@@ -60,14 +77,15 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task RegisterAsync_ShouldThrowConflictException_WhenEmailExists()
         {
-            // Arrange
+
             var context = GetDbContext();
 
             context.Users.Add(new TeamMember
             {
                 Name = "Existing",
                 Email = "test@example.com",
-                PasswordHash = "hash"
+                PasswordHash = "hash",
+                Timezone = "UTC",
             });
             await context.SaveChangesAsync();
 
@@ -82,7 +100,7 @@ namespace HabitHub.UnitTests
                 Timezone = "UTC"
             };
 
-            // Act & Assert
+
             await Assert.ThrowsAsync<ConflictException>(() => service.RegisterAsync(dto));
         }
 
@@ -91,7 +109,7 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task RegisterAsync_ShouldThrowValidationException_WhenUserTypeInvalid()
         {
-            // Arrange
+
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -104,7 +122,7 @@ namespace HabitHub.UnitTests
                 Timezone = "UTC"
             };
 
-            // Act & Assert
+
             await Assert.ThrowsAsync<ValidationException>(() => service.RegisterAsync(dto));
         }
 
@@ -112,7 +130,7 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task LoginAsync_ShouldReturnAuthResponse_WhenCredentialsValid()
         {
-            // Arrange
+
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -122,7 +140,8 @@ namespace HabitHub.UnitTests
             {
                 Name = "Test",
                 Email = "login@test.com",
-                PasswordHash = passwordHasher.HashPassword(null, "Password123!")
+                PasswordHash = passwordHasher.HashPassword(null, "Password123!"),
+                Timezone = "UTC"
             };
 
             context.Users.Add(user);
@@ -135,10 +154,9 @@ namespace HabitHub.UnitTests
                 UserType = "Creator"
             };
 
-            // Act
+
             var result = await service.LoginAsync(dto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(user.Email, result.Email);
         }
@@ -148,7 +166,7 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task LoginAsync_ShouldThrow_WhenUserNotFound()
         {
-            // Arrange
+
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -159,7 +177,6 @@ namespace HabitHub.UnitTests
                 UserType = "Creator"
             };
 
-            // Act & Assert
             await Assert.ThrowsAsync<InvalidCredentialsException>(() => service.LoginAsync(dto));
         }
 
@@ -167,7 +184,7 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task LoginAsync_ShouldThrow_WhenPasswordIncorrect()
         {
-            // Arrange
+
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -177,7 +194,8 @@ namespace HabitHub.UnitTests
             {
                 Name = "Test",
                 Email = "wrongpass@test.com",
-                PasswordHash = passwordHasher.HashPassword(null, "CorrectPassword")
+                PasswordHash = passwordHasher.HashPassword(null, "CorrectPassword"),
+                Timezone = "UTC",
             };
 
             context.Users.Add(user);
@@ -190,7 +208,7 @@ namespace HabitHub.UnitTests
                 UserType = "Creator"
             };
 
-            // Act & Assert
+
             await Assert.ThrowsAsync<InvalidCredentialsException>(() => service.LoginAsync(dto));
         }
 
@@ -198,7 +216,6 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task LoginAsync_ShouldThrow_WhenUserTypeIncorrect()
         {
-            // Arrange
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -208,7 +225,8 @@ namespace HabitHub.UnitTests
             {
                 Name = "Test",
                 Email = "type@test.com",
-                PasswordHash = passwordHasher.HashPassword(null, "Password123!")
+                PasswordHash = passwordHasher.HashPassword(null, "Password123!"),
+                Timezone = "UTC",
             };
 
             context.Users.Add(user);
@@ -221,7 +239,7 @@ namespace HabitHub.UnitTests
                 UserType = "Member" // WRONG
             };
 
-            // Act & Assert
+
             await Assert.ThrowsAsync<InvalidCredentialsException>(() => service.LoginAsync(dto));
         }
 
@@ -230,7 +248,6 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task GetActiveSessionsAsync_ShouldReturnOnlyActiveSessions()
         {
-            // Arrange
             var context = GetDbContext();
             var service = GetService(context);
 
@@ -250,10 +267,8 @@ namespace HabitHub.UnitTests
 
             await context.SaveChangesAsync();
 
-            // Act
             var result = await service.GetActiveSessionsAsync(userId);
 
-            // Assert
             Assert.Single(result);
         }
 
@@ -261,11 +276,10 @@ namespace HabitHub.UnitTests
         [Fact]
         public async Task InvalidateSessionAsync_ShouldThrow_WhenSessionNotFound()
         {
-            // Arrange
             var context = GetDbContext();
             var service = GetService(context);
 
-            // Act & Assert
+
             await Assert.ThrowsAsync<NotFoundException>(() =>
                 service.InvalidateSessionAsync(Guid.NewGuid(), Guid.NewGuid()));
         }
