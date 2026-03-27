@@ -5,6 +5,10 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HabitHub.API", "HabitHub.API\HabitHub.API.csproj", "{528EF92D-3133-4121-8065-67962F336F69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HabitHub.UnitTests", "HabitHub.UnitTests\HabitHub.UnitTests.csproj", "{147A52C3-6D16-40DB-A588-206CF2291175}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HabitHub.ApiTests", "HabitHub.ApiTests\HabitHub.ApiTests.csproj", "{7EE6B44C-77D2-41E4-B845-E1CB6C25006F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{528EF92D-3133-4121-8065-67962F336F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{528EF92D-3133-4121-8065-67962F336F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{528EF92D-3133-4121-8065-67962F336F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{147A52C3-6D16-40DB-A588-206CF2291175}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{147A52C3-6D16-40DB-A588-206CF2291175}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{147A52C3-6D16-40DB-A588-206CF2291175}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{147A52C3-6D16-40DB-A588-206CF2291175}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EE6B44C-77D2-41E4-B845-E1CB6C25006F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EE6B44C-77D2-41E4-B845-E1CB6C25006F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EE6B44C-77D2-41E4-B845-E1CB6C25006F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EE6B44C-77D2-41E4-B845-E1CB6C25006F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
