@@ -75,6 +75,7 @@ export const Register: React.FC = () => {
     <div
       className="min-h-screen bg-cover bg-center relative flex items-center justify-center p-4"
       style={{ backgroundImage: "url('/bg.jpg')" }}
+      //   style = {{backgroundColor: 'black'}}
     >
       <div className="absolute inset-0 bg-black/10" />
 
@@ -141,7 +142,7 @@ export const Register: React.FC = () => {
             </label>
             <select
               {...register('userType', { required: 'Select a role' })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white"
             >
               <option value="Member">Join a team</option>
               <option value="Creator">Create my own team</option>
