@@ -1,9 +1,12 @@
 import { useForm } from 'react-hook-form';
 import api from '../../api/axiosInstance';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from '../../components/ui/Button';
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface RegisterFormInputs {
   name: string;
@@ -14,11 +17,13 @@ interface RegisterFormInputs {
 }
 
 export const Register: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const detectedTimezone =
     Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
     setError,
   } = useForm<RegisterFormInputs>({
@@ -27,9 +32,14 @@ export const Register: React.FC = () => {
       userType: 'Member',
     },
   });
-  const navigate = useNavigate();
 
+  const passwordValue = watch('password', '');
+  const hasNumber = /\d/.test(passwordValue);
+  const hasMinLength = passwordValue.length >= 8;
+
+  const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+
   const onSubmit = async (data: RegisterFormInputs) => {
     try {
       const response = await api.post('/auth/register', data);
@@ -47,21 +57,16 @@ export const Register: React.FC = () => {
 
       switch (status) {
         case 409:
-          setError('email', {
-            type: 'server',
-            message: serverMessage,
-          });
-          return;
-
+          setError('email', { type: 'server', message: serverMessage });
+          break;
         case 400:
           toast.error(serverMessage);
-          return;
+          break;
         case 500:
           toast.error('Server error. Please contact support.');
-          return;
+          break;
         default:
           toast.error(`Unexpected error (${status})`);
-          return;
       }
     }
   };
@@ -71,43 +76,42 @@ export const Register: React.FC = () => {
       className="min-h-screen bg-cover bg-center relative flex items-center justify-center p-4"
       style={{ backgroundImage: "url('/bg.jpg')" }}
     >
-      <div className="absolute inset-0 bg-black/10"></div>
+      <div className="absolute inset-0 bg-black/10" />
+
       <div className="relative w-full flex items-center justify-between px-20">
         <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="bg-white/90 backdrop-blur-md max-w-md w-full h-auto rounded-2xl shadow-2xl p-12 flex flex-col space-y-6"
+          onSubmit={handleSubmit(onSubmit, () => {
+            toast.error('Please fix the errors before submitting.');
+          })}
+          className="bg-white/90 backdrop-blur-md max-w-md w-full rounded-2xl shadow-2xl p-12 flex flex-col space-y-5"
         >
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
-            HabitHub
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Join HabitHub Now
           </h2>
-          <p className="text-center text-gray-500 text-sm mb-4">
-            Create an account
-          </p>
 
+          {/* Name */}
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
-              Name
+              Name <span className="text-red-500">*</span>
             </label>
             <input
-              {...register('name', {
-                required: 'Name is required',
-                minLength: { value: 2, message: 'Minimum 2 characters' },
-              })}
-              className={`w-full px-4 py-2 border rounded-lg outline-none transition-colors ${
+              {...register('name', { required: 'Name is required' })}
+              placeholder="Name"
+              className={`w-full px-4 py-2.5 border rounded-lg outline-none transition-colors bg-gray-50 focus:bg-white ${
                 errors.name
                   ? 'border-red-500 focus:ring-2 focus:ring-red-200'
-                  : 'border-gray-300 focus:ring-2 focus:ring-[#E6E6FA] focus:border-[#E6E6FA]'
+                  : 'border-gray-200 focus:ring-2 focus:ring-gray-900 focus:border-gray-900'
               }`}
-              placeholder="Your name"
             />
             {errors.name && (
               <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
             )}
           </div>
 
+          {/* Email */}
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               {...register('email', {
@@ -117,17 +121,16 @@ export const Register: React.FC = () => {
                   message: 'Incorrect email format',
                 },
               })}
-              className={`w-full px-4 py-2 border rounded-lg outline-none transition-colors ${
+              placeholder="mail@example.com"
+              className={`w-full px-4 py-2.5 border rounded-lg outline-none transition-colors bg-gray-50 focus:bg-white ${
                 errors.email
                   ? 'border-red-500 focus:ring-2 focus:ring-red-200'
-                  : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  : 'border-gray-200 focus:ring-2 focus:ring-gray-900 focus:border-gray-900'
               }`}
-              placeholder="mail@example.com"
             />
-
             {errors.email && (
               <p className="text-sm text-red-500 mt-1">
-                {errors.email.message?.toString()}
+                {errors.email.message}
               </p>
             )}
           </div>
@@ -143,6 +146,75 @@ export const Register: React.FC = () => {
               <option value="Member">Join a team</option>
               <option value="Creator">Create my own team</option>
             </select>
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">
+              Password <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                {...register('password', {
+                  required: 'Password is required',
+                  validate: {
+                    minLength: (v) => v.length >= 8 || 'Minimum 8 characters',
+                    hasNumber: (v) =>
+                      /\d/.test(v) || 'Must contain at least one number',
+                  },
+                })}
+                placeholder="Enter password"
+                className={`w-full px-4 py-2.5 pr-10 border rounded-lg outline-none transition-colors bg-gray-50 focus:bg-white ${
+                  errors.password
+                    ? 'border-red-500 focus:ring-2 focus:ring-red-200'
+                    : 'border-gray-200 focus:ring-2 focus:ring-gray-900 focus:border-gray-900'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            {/* Password hints */}
+            <div className="mt-2 space-y-1">
+              <p className="text-xs text-gray-400 mb-1">
+                Your password need to include:
+              </p>
+              {[
+                { valid: hasNumber, label: 'Must contain one number' },
+                { valid: hasMinLength, label: 'Min 8 characters' },
+              ].map(({ valid, label }) => (
+                <div key={label} className="flex items-center gap-2">
+                  <span
+                    className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                      valid ? 'bg-gray-900' : 'border border-gray-300'
+                    }`}
+                  >
+                    {valid && (
+                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                        <path
+                          d="M1 3.5L3.5 6L8 1"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  <span
+                    className={`text-xs transition-colors ${valid ? 'text-gray-700' : 'text-gray-400'}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col">
@@ -164,44 +236,21 @@ export const Register: React.FC = () => {
             )}
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              {...register('password', {
-                required: 'Enter the password',
-                minLength: { value: 8, message: 'Minimum 8 characters' },
-              })}
-              className={`w-full px-4 py-2 border rounded-lg outline-none transition-colors ${
-                errors.password
-                  ? 'border-red-500 focus:ring-2 focus:ring-red-200'
-                  : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-              }`}
-            />
-            {errors.password && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.password.message?.toString()}
-              </p>
-            )}
-          </div>
-
           <Button
             type="submit"
             isLoading={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition"
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-semibold tracking-widest uppercase text-sm transition"
           >
-            Register
+            Sign Me Up!
           </Button>
 
-          <p className="text-center text-sm text-gray-600 mt-4">
+          <p className="text-center text-sm text-gray-600">
             Already have an account?{' '}
             <Link
               to="/login"
-              className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors"
+              className="text-gray-900 font-semibold border-b border-gray-900 hover:opacity-70 transition-opacity"
             >
-              Login
+              Log in
             </Link>
           </p>
         </form>
