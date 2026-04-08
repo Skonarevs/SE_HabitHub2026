@@ -29,6 +29,10 @@ namespace HabitHub.API.Exceptions
     {
         public ValidationException(string message) : base(message, 400) { }
     }
+    public class ForbiddenException : AppException
+    {
+        public ForbiddenException(string message) : base(message, 403) { }
+    }
 
 
 }
