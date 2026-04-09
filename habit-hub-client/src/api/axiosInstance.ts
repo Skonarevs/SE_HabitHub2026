@@ -7,7 +7,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const sessionId = localStorage.getItem('sessionId');
   if (sessionId) {
-    config.headers['Authorization'] = `Bearer ${sessionId}`;
+    config.headers['X-Session-Id'] = sessionId;
   }
   return config;
 });
