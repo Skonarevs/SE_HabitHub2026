@@ -200,7 +200,7 @@ export const Register: React.FC = () => {
               ].map(({ valid, label }) => (
                 <div key={label} className="flex items-center gap-2">
                   <span
-                    className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                    className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                       valid ? 'bg-gray-900' : 'border border-gray-300'
                     }`}
                   >
