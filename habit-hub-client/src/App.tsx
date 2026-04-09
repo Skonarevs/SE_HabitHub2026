@@ -2,7 +2,6 @@ import { MainLayout } from './components/layout/MainLayout';
 import { Login } from './features/auth/Login';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Register } from './features/auth/Register';
-import { Dashboard } from './features/dashboard/Dashboard';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { PublicRoute } from './features/auth/PublicRoute';
 
@@ -29,15 +28,24 @@ function App() {
       />
 
       <Route
-        path="/dashboard"
+        path="/main-creator"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={'Creator'}>
             <MainLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Dashboard />} />
+        {/* <Route index element={<DashboardLayout />} /> */}
       </Route>
+
+      <Route
+        path="/main-member"
+        element={
+          <ProtectedRoute allowedRoles={'Member'}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
