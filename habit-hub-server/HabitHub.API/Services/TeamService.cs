@@ -43,11 +43,9 @@ namespace HabitHub.API.Services
             }
                 
 
-            // 4. Validate expiry date if provided
             if (dto.ExpiryDate.HasValue && dto.ExpiryDate.Value <= DateTime.UtcNow)
                 throw new ValidationException("Expiry date must be in the future");
 
-            // 5. Create habit entity
             var habit = new Habit
             {
                 Id = Guid.NewGuid(),
@@ -63,8 +61,12 @@ namespace HabitHub.API.Services
             _context.Habits.Add(habit);
             await _context.SaveChangesAsync();
 
-            // 6. Return DTO
             return MapToHabitResponse(habit);
+        }
+
+        public Task<TeamResponseDto> CreateTeamAsync(Guid creatorId, string teamName)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<TeamResponseDto> GetTeamAsync(Guid teamId, Guid userId)
@@ -97,14 +99,25 @@ namespace HabitHub.API.Services
             throw new NotImplementedException();
         }
 
-        public Task<HabitResponseDto> CreateHabitAsync(Guid teamId, CreateHabitDto dto, Guid creatorId)
+        public Task<List<ArchivedHabitDto>> GetArchivedHabitsAsync(Guid teamId, Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ArchivedHabitDto>> GetArchivedHabitsAsync(Guid teamId, Guid userId)
+        private HabitResponseDto MapToHabitResponse(Habit habit)
         {
-            throw new NotImplementedException();
+            return new HabitResponseDto
+            {
+                Id = habit.Id,
+                Name = habit.Name,
+                Goal = habit.Goal,
+                HabitType = habit.Type.ToString(),
+                Unit = habit.Unit,
+                ExpiryDate = habit.ExpiryDate,
+                State = habit.State.ToString(),
+                TeamId = habit.TeamId,
+                TeamName = habit.Team?.Name
+            };
         }
     }
 }
