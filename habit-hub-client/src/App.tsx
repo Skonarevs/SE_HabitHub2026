@@ -4,6 +4,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Register } from './features/auth/Register';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { PublicRoute } from './features/auth/PublicRoute';
+import { ChangeEmailPage } from './features/dashboards/settings/ChangeEmailPage';
+import { ChangePasswordPage } from './features/dashboards/settings/ChangePasswordPage';
+import { ActiveSessionsPage } from './features/dashboards/settings/ActiveSessionsPage';
+import { MainPanel } from './features/dashboards/MainPanel';
 
 function App() {
   return (
@@ -35,7 +39,10 @@ function App() {
           </ProtectedRoute>
         }
       >
-        {/* <Route index element={<DashboardLayout />} /> */}
+        <Route index element={<MainPanel />} />
+        <Route path="sessions" element={<ActiveSessionsPage />} />
+        <Route path="change-password" element={<ChangePasswordPage />} />
+        <Route path="change-email" element={<ChangeEmailPage />} />
       </Route>
 
       <Route
@@ -45,7 +52,12 @@ function App() {
             <MainLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<MainPanel />} />
+        <Route path="sessions" element={<ActiveSessionsPage />} />
+        <Route path="change-password" element={<ChangePasswordPage />} />
+        <Route path="change-email" element={<ChangeEmailPage />} />
+      </Route>
     </Routes>
   );
 }

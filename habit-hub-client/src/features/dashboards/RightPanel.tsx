@@ -1,6 +1,6 @@
 export const RightPanel = () => {
   return (
-    <aside className="flex flex-col px-6 py-6 h-full overflow-hidden border-l border-gray-100">
+    <aside className="flex flex-col pr-5 py-8 justify-between h-full pl-3 border border-gray-100 rounded-3xl shadow-sm">
       <h3 className="text-center text-gray-500 text-sm font-medium border-b border-gray-100 pb-2 mb-4">
         Activity
       </h3>
