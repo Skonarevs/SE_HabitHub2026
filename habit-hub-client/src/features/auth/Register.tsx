@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from '../../components/ui/Button';
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, HelpCircle } from 'lucide-react';
 
 interface RegisterFormInputs {
   name: string;
@@ -82,7 +82,7 @@ export const Register: React.FC = () => {
   return (
     <div
       className="min-h-screen bg-cover bg-center relative flex items-center justify-center p-4"
-      style={{ backgroundImage: "url('/bg.jpg')" }}
+      // style={{ backgroundImage: "url('/bg.jpg')" }}
       //   style = {{backgroundColor: 'black'}}
     >
       <div className="absolute inset-0 bg-black/10" />
@@ -92,11 +92,18 @@ export const Register: React.FC = () => {
           onSubmit={handleSubmit(onSubmit, () => {
             toast.error('Please fix the errors before submitting.');
           })}
-          className="bg-white/90 backdrop-blur-md max-w-md w-full rounded-2xl shadow-2xl p-12 flex flex-col space-y-5"
+          className="relative bg-white/90 backdrop-blur-md max-w-md w-full rounded-2xl shadow-2xl p-12 flex flex-col space-y-5"
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Join HabitHub Now
           </h2>
+          <Link
+            to="/about"
+            className="absolute top-10 right-6 z-20 flex items-center justify-center w-10 h-10 bg-white/50 hover:bg-white/90 backdrop-blur-md rounded-full shadow-sm text-gray-700 hover:text-gray-900 transition-all"
+            title="About HabitHub"
+          >
+            <HelpCircle size={22} />
+          </Link>
 
           {/* Name */}
           <div className="flex flex-col">

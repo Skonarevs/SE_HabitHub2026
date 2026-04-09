@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { changeEmail } from '../../../api/authApi';
+import { useNotificationStore } from '../../../store/useNotificationStore';
 
 export const ChangeEmailPage = () => {
   const [newEmail, setNewEmail] = useState('');
@@ -7,6 +8,9 @@ export const ChangeEmailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -24,6 +28,11 @@ export const ChangeEmailPage = () => {
       setIsSuccess(true);
       setNewEmail('');
       setPassword('');
+      addNotification({
+        type: 'success',
+        title: 'Security Alert',
+        message: 'Your email was successfully changed just now.',
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to change email.');
     } finally {
