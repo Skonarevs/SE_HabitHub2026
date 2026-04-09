@@ -34,7 +34,11 @@ export const Login: React.FC = () => {
   const onSubmit = async (data: LoginInputs) => {
     try {
       const response = await api.post('/auth/login', data);
-      login(response.data.name, response.data.sessionId);
+      login(
+        response.data.name,
+        response.data.sessionId,
+        response.data.userType
+      );
       navigate('/dashboard');
     } catch (error: any) {
       if (!error.response) {

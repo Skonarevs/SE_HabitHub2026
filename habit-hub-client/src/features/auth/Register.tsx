@@ -43,7 +43,11 @@ export const Register: React.FC = () => {
   const onSubmit = async (data: RegisterFormInputs) => {
     try {
       const response = await api.post('/auth/register', data);
-      login(response.data.name, response.data.sessionId);
+      login(
+        response.data.name,
+        response.data.sessionId,
+        response.data.userType
+      );
       navigate('/dashboard');
     } catch (error: any) {
       if (!error.response) {
