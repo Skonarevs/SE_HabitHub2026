@@ -28,15 +28,24 @@ function App() {
       />
 
       <Route
-        path="/dashboard"
+        path="/main-creator"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={'Creator'}>
             <MainLayout />
           </ProtectedRoute>
         }
       >
         {/* <Route index element={<DashboardLayout />} /> */}
       </Route>
+
+      <Route
+        path="/main-member"
+        element={
+          <ProtectedRoute allowedRoles={'Member'}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

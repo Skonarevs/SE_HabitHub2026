@@ -48,7 +48,11 @@ export const Register: React.FC = () => {
         response.data.sessionId,
         response.data.userType
       );
-      navigate('/dashboard');
+      if (response.data.userType === 'creator') {
+        navigate('/main-creator', { replace: true });
+      } else {
+        navigate('/main-member', { replace: true });
+      }
     } catch (error: any) {
       if (!error.response) {
         toast.error('Server is not responding. Please try again later.');
