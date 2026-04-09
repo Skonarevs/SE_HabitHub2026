@@ -8,12 +8,15 @@ import { ChangeEmailPage } from './features/dashboards/settings/ChangeEmailPage'
 import { ChangePasswordPage } from './features/dashboards/settings/ChangePasswordPage';
 import { ActiveSessionsPage } from './features/dashboards/settings/ActiveSessionsPage';
 import { MainPanel } from './features/dashboards/MainPanel';
+import { AboutPage } from './features/auth/AboutPage';
+import { Reminders } from './features/dashboards/settings/Reminders';
+import { Notifications } from './features/dashboards/settings/Notifications';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
-
+      <Route path="/about" element={<AboutPage />} />
       <Route
         path="/login"
         element={
@@ -43,6 +46,7 @@ function App() {
         <Route path="sessions" element={<ActiveSessionsPage />} />
         <Route path="change-password" element={<ChangePasswordPage />} />
         <Route path="change-email" element={<ChangeEmailPage />} />
+        <Route path="notifications" element={<Notifications />} />
       </Route>
 
       <Route
@@ -57,6 +61,8 @@ function App() {
         <Route path="sessions" element={<ActiveSessionsPage />} />
         <Route path="change-password" element={<ChangePasswordPage />} />
         <Route path="change-email" element={<ChangeEmailPage />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="reminders" element={<Reminders />} />
       </Route>
     </Routes>
   );

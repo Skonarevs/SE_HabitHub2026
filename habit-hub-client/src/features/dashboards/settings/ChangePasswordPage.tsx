@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { changePassword } from '../../../api/authApi';
+import { useNotificationStore } from '../../../store/useNotificationStore';
 
 export const ChangePasswordPage = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -7,6 +8,9 @@ export const ChangePasswordPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -26,6 +30,11 @@ export const ChangePasswordPage = () => {
       setIsSuccess(true);
       setCurrentPassword('');
       setNewPassword('');
+      addNotification({
+        type: 'success',
+        title: 'Security Alert',
+        message: 'Your password was successfully changed just now.',
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to change password.'
