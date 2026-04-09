@@ -6,6 +6,8 @@ using HabitHub.API.Controllers;
 using Microsoft.AspNetCore.Identity;
 using HabitHub.Models.Entities;
 using HabitHub.API.Middleware;
+using Microsoft.AspNetCore.Authentication;
+using HabitHub.API.Auth;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +43,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "Session";
+    options.DefaultChallengeScheme = "Session";
+})
+.AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>("Session", null);
 
 
 var app = builder.Build();
@@ -60,7 +68,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseMiddleware<SessionAuthMiddleware>();
 
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

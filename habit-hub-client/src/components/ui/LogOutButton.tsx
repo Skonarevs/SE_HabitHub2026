@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogOut, AlertCircle } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 
