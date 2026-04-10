@@ -44,27 +44,26 @@ namespace HabitHub.ApiTests
 
         protected HttpClient CreateAuthenticatedClient(Guid userId, string email, Guid sessionId)
         {
-
             var authedFactory = Factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Register the options the handler needs
                     services.AddSingleton(new TestAuthHandlerOptions
                     {
                         UserId = userId.ToString(),
                         Email = email,
-                        SessionId = sessionId.ToString() 
+                        SessionId = sessionId.ToString()
                     });
 
-                    // Override the default auth scheme so [Authorize] uses our test handler
                     services.AddAuthentication(defaultScheme: "Test")
                             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                                 "Test", _ => { });
                 });
             });
 
-            return authedFactory.CreateClient();
+            var client = authedFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("X-Session-Id", sessionId.ToString());
+            return client;
         }
 
 
