@@ -1,10 +1,15 @@
 // 1. Добавили иконку Check для кнопки
-import { CheckCircle2, AlertCircle, Info, Check } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { useNotificationStore } from '../../../store/useNotificationStore';
 
 export const Notifications = () => {
-  const { notifications, markAllAsRead, markAsRead, clearNotifications } =
-    useNotificationStore();
+  const {
+    notifications,
+    markAllAsRead,
+    markAsRead,
+    clearNotifications,
+    deleteNotification,
+  } = useNotificationStore();
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -52,6 +57,11 @@ export const Notifications = () => {
           notifications.map((notif) => (
             <div
               key={notif.id}
+              onMouseEnter={() => {
+                if (!notif.isRead) {
+                  markAsRead(notif.id);
+                }
+              }}
               className={`group relative flex items-start gap-4 p-5 rounded-2xl border transition-all ${
                 notif.isRead
                   ? 'bg-white border-gray-100 opacity-70'
@@ -77,15 +87,16 @@ export const Notifications = () => {
               {!notif.isRead && (
                 <>
                   <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mt-2 group-hover:opacity-0 transition-opacity" />
-
-                  <button
-                    onClick={() => markAsRead(notif.id)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 bg-white shadow-md border border-gray-100 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-600 hover:text-green-600 flex items-center gap-2 transition-all duration-200"
-                  >
-                    <Check size={16} />
-                    Mark as read
-                  </button>
                 </>
+              )}
+
+              {notif.isRead && (
+                <button
+                  onClick={() => deleteNotification(notif.id)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 bg-white shadow-md border border-gray-100 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-600 hover:text-red-600 flex items-center gap-2 transition-all duration-200"
+                >
+                  Delete
+                </button>
               )}
             </div>
           ))
