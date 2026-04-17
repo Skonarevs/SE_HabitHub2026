@@ -165,8 +165,13 @@ namespace HabitHub.ApiTests
             var (userId, sessionId, _, habitId) = await SeedFullSetupAsync();
             var client = CreateAuthenticatedClient(userId, "test@test.com", sessionId);
 
-            var response = await client.PatchAsJsonAsync($"/habits/{habitId}",
-                new UpdateHabitDto { Name = "Updated Name" });
+            var response = await client.PatchAsJsonAsync($"/habits/{habitId}", new UpdateHabitDto
+            {
+                Name = "Updated Name",
+                Goal = "Updated Goal",
+                HabitType = "Binary", 
+                Unit = "times"        
+            });
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var result = await response.Content.ReadFromJsonAsync<HabitResponseDto>();
@@ -180,16 +185,15 @@ namespace HabitHub.ApiTests
             var (memberId, memberSessionId) = await SeedMemberWithSessionAsync(teamId);
             var client = CreateAuthenticatedClient(memberId, "member@test.com", memberSessionId);
 
-            var response = await client.PatchAsJsonAsync($"/habits/{habitId}",
-                new UpdateHabitDto { Name = "Hacked Name" });
+            var response = await client.PatchAsJsonAsync($"/habits/{habitId}", new UpdateHabitDto
+            {
+                Name = "Hacked Name",
+                Goal = "Hacked Goal",
+                HabitType = "Binary",
+                Unit = "times"       
+            });
 
-
-            var body = await response.Content.ReadAsStringAsync(); // add this
-            Console.WriteLine(body);                               // add this
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-           // Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         [Fact]
@@ -198,8 +202,13 @@ namespace HabitHub.ApiTests
             var (userId, sessionId, _, _) = await SeedFullSetupAsync();
             var client = CreateAuthenticatedClient(userId, "test@test.com", sessionId);
 
-            var response = await client.PatchAsJsonAsync($"/habits/{Guid.NewGuid()}",
-                new UpdateHabitDto { Name = "Ghost" });
+            var response = await client.PatchAsJsonAsync($"/habits/{Guid.NewGuid()}", new UpdateHabitDto
+            {
+                Name = "Ghost",
+                Goal = "Ghost Goal", 
+                HabitType = "Binary",
+                Unit = "times"       
+            });
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
