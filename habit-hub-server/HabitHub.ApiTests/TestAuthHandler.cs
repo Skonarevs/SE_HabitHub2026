@@ -8,7 +8,7 @@ public class TestAuthHandlerOptions
 {
     public string UserId { get; set; } = "1";
     public string Email { get; set; } = "test@test.com";
-    public string SessionId { get; set; } = Guid.NewGuid().ToString(); // FIX: added
+    public string SessionId { get; set; } = Guid.NewGuid().ToString();
 }
 
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
@@ -32,7 +32,7 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         {
             new Claim(ClaimTypes.NameIdentifier, _options.UserId),
             new Claim(ClaimTypes.Email, _options.Email),
-            new Claim("SessionId", _options.SessionId)  // FIX: controller needs this
+            new Claim("SessionId", _options.SessionId)
         };
 
         var identity = new ClaimsIdentity(claims, "Test");
