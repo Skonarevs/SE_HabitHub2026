@@ -10,5 +10,6 @@
         public ICollection<Habit> Habits { get; set; } = new List<Habit>();
         public TeamChat Chat { get; set; }
         public ICollection<InviteCode> InviteCodes { get; set; } = new List<InviteCode>();
+        public DateTime CreatedAt { get; set; }
     }
 }
