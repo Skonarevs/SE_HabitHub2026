@@ -16,6 +16,7 @@ import { useNotificationStore } from './store/useNotificationStore';
 import { TeamsPanel } from './features/dashboards/teams/TeamsPanel';
 import { JoinTeams } from './features/dashboards/teams/JoinTeams';
 import { CreateTeam } from './features/dashboards/teams/CreateTeam';
+import { HabitsList } from './features/dashboards/teams/HabitsList';
 
 function App() {
   const initWelcome = useNotificationStore((state) => state.initWelcome);
@@ -60,6 +61,10 @@ function App() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="teams-creator" element={<TeamsPanel />} />
         <Route path="teams-creator/create-team" element={<CreateTeam />} />
+        <Route
+          path="teams-creator/habits-creator/:teamId"
+          element={<HabitsList />}
+        />
       </Route>
 
       <Route
@@ -78,6 +83,10 @@ function App() {
         <Route path="reminders" element={<Reminders />} />
         <Route path="teams-member" element={<TeamsPanel />} />
         <Route path="teams-member/join-team" element={<JoinTeams />} />
+        <Route
+          path="teams-member/habits-member/:teamId"
+          element={<HabitsList />}
+        />
       </Route>
     </Routes>
   );
