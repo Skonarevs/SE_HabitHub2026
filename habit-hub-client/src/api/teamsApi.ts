@@ -48,6 +48,6 @@ export const getTeamsInfo = async (): Promise<TeamInfo[]> => {
 };
 
 export const createTeam = async (name: string) => {
-  const response = await api.post('/teams', { name });
+  const response = await api.post('/teams', { name: name });
   return response.data;
 };
