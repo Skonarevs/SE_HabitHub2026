@@ -13,7 +13,9 @@ import { ChangePasswordPage } from './features/dashboards/settings/ChangePasswor
 import { Notifications } from './features/dashboards/settings/Notifications';
 import { Reminders } from './features/dashboards/settings/Reminders';
 import { useNotificationStore } from './store/useNotificationStore';
-import { TeamsPanel } from './features/dashboards/settings/TeamsPanel';
+import { TeamsPanel } from './features/dashboards/teams/TeamsPanel';
+import { JoinTeams } from './features/dashboards/teams/JoinTeams';
+import { CreateTeam } from './features/dashboards/teams/CreateTeam';
 
 function App() {
   const initWelcome = useNotificationStore((state) => state.initWelcome);
@@ -57,6 +59,7 @@ function App() {
         <Route path="change-email" element={<ChangeEmailPage />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="teams-creator" element={<TeamsPanel />} />
+        <Route path="teams-creator/create-team" element={<CreateTeam />} />
       </Route>
 
       <Route
@@ -74,6 +77,7 @@ function App() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="reminders" element={<Reminders />} />
         <Route path="teams-member" element={<TeamsPanel />} />
+        <Route path="teams-member/join-team" element={<JoinTeams />} />
       </Route>
     </Routes>
   );
