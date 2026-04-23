@@ -22,13 +22,27 @@ namespace HabitHub.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto dto)
-        {
-            var userId = User.GetUserId();
-            var team = await _teamService.CreateTeamAsync(userId, dto.Name);
-            return CreatedAtAction(nameof(GetTeam), new { teamId = team.Id }, team);
-        }
-
+public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto dto)
+{
+    try
+    {
+        var userId = User.GetUserId();
+        var team = await _teamService.CreateTeamAsync(userId, dto.Name);
+        return CreatedAtAction(nameof(GetTeam), new { teamId = team.Id }, team);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex); 
+        return StatusCode(500, ex.Message);
+    }
+}
+    //    [HttpGet]
+    //    public async Task<IActionResult> GetUserTeams()
+    //   {
+    //      var userId = User.GetUserId();
+    //      var teams = await _teamService.GetUserTeamsAsync(userId);
+    //      return Ok(teams);
+    //    }
         [HttpGet("{teamId}")]
         public async Task<IActionResult> GetTeam(Guid teamId)
         {
