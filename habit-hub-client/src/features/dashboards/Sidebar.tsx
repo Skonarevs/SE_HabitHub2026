@@ -70,7 +70,7 @@ export const Sidebar = () => {
           </NavLink>
           {role === 'Member' && (
             <NavLink
-              to="teams-members"
+              to="teams-member"
               className={({ isActive }) =>
                 `flex items-center gap-3 ${isActive ? 'text-black font-bold' : 'hover:text-black'}`
               }

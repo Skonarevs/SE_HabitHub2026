@@ -1,18 +1,29 @@
+import { useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
+import { AboutPage } from './features/auth/AboutPage';
 import { Login } from './features/auth/Login';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Register } from './features/auth/Register';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { PublicRoute } from './features/auth/PublicRoute';
+import { Register } from './features/auth/Register';
+import { MainPanel } from './features/dashboards/MainPanel';
+import { ActiveSessionsPage } from './features/dashboards/settings/ActiveSessionsPage';
 import { ChangeEmailPage } from './features/dashboards/settings/ChangeEmailPage';
 import { ChangePasswordPage } from './features/dashboards/settings/ChangePasswordPage';
-import { ActiveSessionsPage } from './features/dashboards/settings/ActiveSessionsPage';
-import { MainPanel } from './features/dashboards/MainPanel';
-import { AboutPage } from './features/auth/AboutPage';
-import { Reminders } from './features/dashboards/settings/Reminders';
 import { Notifications } from './features/dashboards/settings/Notifications';
+import { Reminders } from './features/dashboards/settings/Reminders';
+import { useNotificationStore } from './store/useNotificationStore';
+import { TeamsPanel } from './features/dashboards/teams/TeamsPanel';
+import { JoinTeams } from './features/dashboards/teams/JoinTeams';
+import { CreateTeam } from './features/dashboards/teams/CreateTeam';
 
 function App() {
+  const initWelcome = useNotificationStore((state) => state.initWelcome);
+
+  useEffect(() => {
+    initWelcome();
+  }, [initWelcome]);
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
@@ -47,6 +58,8 @@ function App() {
         <Route path="change-password" element={<ChangePasswordPage />} />
         <Route path="change-email" element={<ChangeEmailPage />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="teams-creator" element={<TeamsPanel />} />
+        <Route path="teams-creator/create-team" element={<CreateTeam />} />
       </Route>
 
       <Route
@@ -63,6 +76,8 @@ function App() {
         <Route path="change-email" element={<ChangeEmailPage />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="reminders" element={<Reminders />} />
+        <Route path="teams-member" element={<TeamsPanel />} />
+        <Route path="teams-member/join-team" element={<JoinTeams />} />
       </Route>
     </Routes>
   );
