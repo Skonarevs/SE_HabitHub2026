@@ -13,13 +13,10 @@ namespace HabitHub.ApiTests
     {
         public TeamsControllerApiTests(WebApplicationFactory<Program> factory) : base(factory) { }
 
-        // -----------------------------------------------------------------------
-        // Seed helpers
-        // -----------------------------------------------------------------------
 
-        /// <summary>
-        /// Seeds a TeamCreator with a session in a single DB scope.
-        /// </summary>
+
+        // Seeds a TeamCreator with a session in a single DB scope.
+
         private async Task<(Guid userId, Guid sessionId)> SeedCreatorWithSessionAsync()
         {
             using var scope = Factory.Services.CreateScope();
