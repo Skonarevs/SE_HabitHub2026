@@ -68,26 +68,19 @@ namespace HabitHub.API.Services
         {
             var creator = await _context.Users.OfType<TeamCreator>().FirstOrDefaultAsync(u => u.Id == creatorId);
             if (creator == null)
-            {
                 throw new ForbiddenException("Only team creators can create teams");
-            }
-
 
             if (string.IsNullOrWhiteSpace(teamName))
-            {
                 throw new ValidationException("Team name is required");
-            }
 
             var team = new Team
             {
                 Id = Guid.NewGuid(),
                 Name = teamName,
                 CreatorId = creatorId,
-                Chat = new TeamChat(),
-                CreatedAt = DateTime.UtcNow
+                Chat = new TeamChat()
             };
             _context.Teams.Add(team);
-
             var membership = new Membership
             {
                 UserId = creatorId,
@@ -98,8 +91,19 @@ namespace HabitHub.API.Services
             _context.Memberships.Add(membership);
 
             await _context.SaveChangesAsync();
+            var code = GenerateRandomCode(8);
+            var inviteCode = new InviteCode
+            {
+                Id = Guid.NewGuid(),
+                Code = code,
+                TeamId = team.Id,
+                ExpiryDate = DateTime.UtcNow.AddDays(10),
+                State = InviteCodeState.Active
+            };
+            _context.InviteCodes.Add(inviteCode);
+            await _context.SaveChangesAsync();
 
-            return MapToTeamResponse(team);
+            return MapToTeamResponse(team, code);
         }
 
         public async Task<TeamResponseDto> GetTeamAsync(Guid teamId, Guid userId)
@@ -111,18 +115,22 @@ namespace HabitHub.API.Services
             {
                 throw new NotFoundException("Team not found");
             }
-
-
+                
             bool isCreator = (team.CreatorId == userId);
             bool isActiveMember = await _context.Memberships
                 .AnyAsync(m => m.TeamId == teamId && m.UserId == userId && m.Status == MembershipStatus.Active);
-            if (!isCreator || !isActiveMember)
+            if (!isCreator && !isActiveMember)
             {
                 throw new ForbiddenException("You do not have access to this team");
             }
+                
+            var inviteCode = await _context.InviteCodes
+                .Where(ic => ic.TeamId == teamId && ic.State == InviteCodeState.Active)
+                .FirstOrDefaultAsync();
 
+            string codeValue = inviteCode?.Code; 
 
-            return MapToTeamResponse(team);
+            return MapToTeamResponse(team, codeValue);
         }
 
         public async Task<InviteCodeResponseDto> GenerateInviteCodeAsync(Guid teamId, Guid creatorId)
@@ -284,6 +292,39 @@ namespace HabitHub.API.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<HabitResponseDto>> GetActiveHabitsAsync(Guid teamId, Guid userId)
+        {
+            var team = await _context.Teams.FindAsync(teamId);
+            if (team == null)
+            {
+                throw new NotFoundException("Team not found");
+            }
+
+            var isCreator = team.CreatorId == userId;
+            var isActiveMember = await _context.Memberships
+                .AnyAsync(m => m.TeamId == teamId && m.UserId == userId && m.Status == MembershipStatus.Active);
+            if (!isCreator && !isActiveMember)
+            {
+                throw new ForbiddenException("You are not a member of this team");
+            }
+
+            return await _context.Habits
+                .Where(h => h.TeamId == teamId && h.State == HabitState.Active)
+                .Select(h => new HabitResponseDto
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    Goal = h.Goal,
+                    HabitType = h.Type.ToString(),
+                    Unit = h.Unit,
+                    ExpiryDate = h.ExpiryDate,
+                    State = h.State.ToString(),
+                    TeamId = h.TeamId,
+                    TeamName = h.Team != null ? h.Team.Name : null
+                })
+                .ToListAsync();
+        }
+
         public async Task<List<ArchivedHabitDto>> GetArchivedHabitsAsync(Guid teamId, Guid userId)
         {
             var team = await _context.Teams.FindAsync(teamId);
@@ -345,15 +386,39 @@ namespace HabitHub.API.Services
         }
 
 
-        private TeamResponseDto MapToTeamResponse(Team team)
+        private TeamResponseDto MapToTeamResponse(Team team, string code)
         {
             return new TeamResponseDto
             {
                 Id = team.Id,
                 Name = team.Name,
                 CreatorId = team.CreatorId,
-                CreatedAt = team.CreatedAt 
+                InviteCode = code
             };
+        }
+
+
+        public async Task<List<TeamResponseDto>> GetTeamsForUserAsync(Guid userId)
+        {
+            var memberships = await _context.Memberships
+                .Where(m => m.UserId == userId && m.Status == MembershipStatus.Active)
+                .Include(m => m.Team)
+                .ToListAsync();
+
+            var teamIds = memberships.Select(m => m.Team.Id).ToList();
+            var activeCodes = await _context.InviteCodes
+                .Where(ic => teamIds.Contains(ic.TeamId) && ic.State == InviteCodeState.Active && ic.ExpiryDate > DateTime.UtcNow)
+                .GroupBy(ic => ic.TeamId)
+                .Select(g => new { TeamId = g.Key, Code = g.First().Code })
+                .ToDictionaryAsync(k => k.TeamId, v => v.Code);
+
+            return memberships.Select(m => new TeamResponseDto
+            {
+                Id = m.Team.Id,
+                Name = m.Team.Name,
+                CreatorId = m.Team.CreatorId,
+                InviteCode = activeCodes.ContainsKey(m.Team.Id) ? activeCodes[m.Team.Id] : null
+            }).ToList();
         }
 
 

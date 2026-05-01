@@ -1,65 +1,159 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react'; //added please
 import { useAuthStore } from '../../../store/useAuthStore';
-import { Link } from 'react-router-dom';
-
-type HabitUI = {
-  id: string;
-  name: string;
-  goal: string;
-  reminderTime: string;
-  reminderEnabled: boolean;
-  leaderboardRank: number;
-
-  endDate?: string;
-  lastProgressDate?: string;
-
-  type?: string;
-};
-
-const mockHabits: HabitUI[] = [
-  {
-    id: '1',
-    name: 'Morning Hydration',
-    goal: 'Drink 500ml water',
-    reminderTime: '07:00 AM',
-    reminderEnabled: true,
-    leaderboardRank: 2,
-    endDate: 'May 12, 2026',
-    lastProgressDate: 'Today, 08:15 AM',
-    type: 'ml',
-  },
-  {
-    id: '2',
-    name: 'Code Review Hour',
-    goal: 'Review 3 PRs',
-    reminderTime: '02:00 PM',
-    reminderEnabled: false,
-    leaderboardRank: 5,
-    endDate: 'May 15, 2026',
-    lastProgressDate: 'Yesterday',
-    type: 'count',
-  },
-];
+import { Link, useParams } from 'react-router-dom'; //added please
+import {
+  archiveHabit,
+  deleteHabit,
+  getActiveHabits,
+  getArchivedHabits,
+  updateHabit,
+} from '../../../api/teamsApi'; //added please
+import type { TeamHabitInfo } from '../../../types/teamsTypes'; //added please
 
 export const HabitsList = () => {
   const { role } = useAuthStore();
   const isCreator = role === 'Creator';
+  const { teamId } = useParams<{ teamId: string }>(); //added please
 
-  const [habits, setHabits] = useState<HabitUI[]>(mockHabits);
+  const [habits, setHabits] = useState<TeamHabitInfo[]>([]); //added please
+  const [loading, setLoading] = useState(true); //added please
+  const [error, setError] = useState<string | null>(null); //added please
+  const [showArchived, setShowArchived] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<TeamHabitInfo | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editGoal, setEditGoal] = useState('');
+  const [editType, setEditType] = useState<'Binary' | 'Quantitative'>('Binary');
+  const [editUnit, setEditUnit] = useState('');
+  const [editExpiryDate, setEditExpiryDate] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
-  const toggleReminder = (id: string) => {
-    setHabits(
-      habits.map((h) =>
-        h.id === id ? { ...h, reminderEnabled: !h.reminderEnabled } : h
-      )
-    );
-  };
+  const loadHabits = async () => { //added please
+    if (!teamId) { //added please
+      setError('Team id is missing.'); //added please
+      setLoading(false); //added please
+      return; //added please
+    } //added please
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Delete this habit?')) {
-      setHabits(habits.filter((h) => h.id !== id));
+    try { //added please
+      setLoading(true); //added please
+      setError(null); //added please
+      const data = showArchived
+        ? await getArchivedHabits(teamId)
+        : await getActiveHabits(teamId); //added please
+      setHabits(data); //added please
+    } catch (err) { //added please
+      const message = err instanceof Error ? err.message : 'Failed to load habits.'; //added please
+      setError(message); //added please
+    } finally { //added please
+      setLoading(false); //added please
+    } //added please
+  }; //added please
+
+  useEffect(() => { //added please
+    void loadHabits(); //added please
+  }, [teamId, showArchived]); //added please
+
+  const handleArchive = async (id: string) => {
+    if (!window.confirm('Archive this habit?')) return;
+
+    try {
+      await archiveHabit(id);
+      setHabits((prev) => prev.filter((h) => h.id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to archive habit.');
     }
   };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Delete this habit?')) return;
+
+    try {
+      await deleteHabit(id);
+      setHabits((prev) => prev.filter((h) => h.id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete habit.');
+    }
+  };
+
+  const startEdit = (habit: TeamHabitInfo) => {
+    setEditingHabit(habit);
+    setEditName(habit.name);
+    setEditGoal(habit.goal);
+    setEditType(habit.habitType === 'Quantitative' ? 'Quantitative' : 'Binary');
+    setEditUnit(habit.unit ?? '');
+    setEditExpiryDate(habit.expiryDate ? habit.expiryDate.toISOString().slice(0, 10) : '');
+    setEditError(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingHabit(null);
+    setEditName('');
+    setEditGoal('');
+    setEditType('Binary');
+    setEditUnit('');
+    setEditExpiryDate('');
+    setEditError(null);
+    setEditLoading(false);
+  };
+
+  const saveEdit = async () => {
+    if (!editingHabit) return;
+
+    if (!editName.trim() || !editGoal.trim()) {
+      setEditError('Name and goal are required.');
+      return;
+    }
+
+    if (editType === 'Quantitative' && !editUnit.trim()) {
+      setEditError('Unit is required for quantitative habits.');
+      return;
+    }
+
+    try {
+      setEditLoading(true);
+      setEditError(null);
+
+      const updated = await updateHabit(editingHabit.id, {
+        name: editName.trim(),
+        goal: editGoal.trim(),
+        habitType: editType,
+        unit: editType === 'Quantitative' ? editUnit.trim() : '',
+        expiryDate: editExpiryDate
+          ? new Date(`${editExpiryDate}T23:59:59.999Z`).toISOString()
+          : undefined,
+      });
+
+      setHabits((prev) => prev.map((h) => (h.id === editingHabit.id ? { ...h, ...updated } : h)));
+      cancelEdit();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to update habit.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  if (loading) { //added please
+    return ( //added please
+      <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden"> //added please
+        Loading habits...
+      </div> //added please
+    ); //added please
+  } //added please
+
+  if (error) { //added please
+    return ( //added please
+      <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden"> //added please
+        <p className="text-red-600 mb-4">{error}</p> //added please
+        <button //added please
+          onClick={() => void loadHabits()} //added please
+          className="w-fit bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-xl text-sm font-semibold" //added please
+        > //added please
+          Retry //added please
+        </button> //added please
+      </div> //added please
+    ); //added please
+  } //added please
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden">
@@ -92,21 +186,108 @@ export const HabitsList = () => {
         {/* Right Side: Actions */}
         <div className="flex items-center gap-4">
           {/* Archive Link/Button */}
-          <button className="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors px-2">
-            View Archive
-          </button>
+          {isCreator && (
+            <button
+              onClick={() => setShowArchived((prev) => !prev)}
+              className="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors px-2"
+            >
+              {showArchived ? 'View Active' : 'View Archive'}
+            </button>
+          )}
 
           {/* Conditional New Habit Button */}
           {isCreator && (
-            <button className="bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow hover:-translate-y-0.5">
+            <Link
+              to={`/main-creator/teams-creator/habits-creator/${teamId}/create`}
+              className="bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow hover:-translate-y-0.5"
+            >
               + New Habit
-            </button>
+            </Link>
           )}
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
+        {editingHabit && (
+          <div className="mb-6 border border-gray-200 rounded-2xl p-4 bg-gray-50">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Edit Habit</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm"
+                  type="text"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Goal</label>
+                <input
+                  value={editGoal}
+                  onChange={(e) => setEditGoal(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm"
+                  type="text"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value as 'Binary' | 'Quantitative')}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm"
+                >
+                  <option value="Binary">Binary</option>
+                  <option value="Quantitative">Quantitative</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                <input
+                  value={editUnit}
+                  onChange={(e) => setEditUnit(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm"
+                  type="text"
+                  disabled={editType !== 'Quantitative'}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                <input
+                  value={editExpiryDate}
+                  onChange={(e) => setEditExpiryDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm"
+                  type="date"
+                />
+              </div>
+            </div>
+
+            {editError && <p className="text-sm text-red-600 mt-3">{editError}</p>}
+
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => void saveEdit()}
+                disabled={editLoading}
+                className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+              >
+                {editLoading ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                onClick={cancelEdit}
+                disabled={editLoading}
+                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         <table className="w-full text-left border-separate border-spacing-y-3">
           <thead>
             <tr className="text-gray-400 text-sm uppercase tracking-wider">
@@ -122,9 +303,6 @@ export const HabitsList = () => {
               ) : (
                 <th className="px-4 py-2 font-medium">End Date</th>
               )}
-
-              <th className="px-4 py-2 font-medium">Reminder</th>
-              <th className="px-4 py-2 font-medium text-center">LeaderBoard</th>
 
               <th className="px-4 py-2 font-medium text-right">
                 {isCreator ? 'Manage' : 'Progress'}
@@ -156,13 +334,13 @@ export const HabitsList = () => {
                     {/* Type (Creator) */}
                     <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        {habit.type}
+                        {habit.habitType}
                       </span>
                     </td>
                     {/* End Date (Creator) */}
                     <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                       <span className="text-gray-500 text-sm">
-                        {habit.endDate}
+                        {habit.expiryDate ? habit.expiryDate.toLocaleDateString() : '-'}
                       </span>
                     </td>
                   </>
@@ -170,50 +348,31 @@ export const HabitsList = () => {
                   /* Create Date (Member) */
                   <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                     <span className="text-gray-500 text-sm">
-                      {habit.endDate}
+                      {habit.expiryDate ? habit.expiryDate.toLocaleDateString() : '-'}
                     </span>
                   </td>
                 )}
-
-                {/* Reminder (Both) */}
-                <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-mono text-gray-600">
-                      {habit.reminderTime}
-                    </span>
-                    <button
-                      onClick={() => toggleReminder(habit.id)}
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${habit.reminderEnabled ? 'bg-black' : 'bg-gray-300'}`}
-                    >
-                      <span
-                        className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${habit.reminderEnabled ? 'translate-x-5' : 'translate-x-1'}`}
-                      />
-                    </button>
-                  </div>
-                </td>
-
-                {/* Leaderboard (Both) */}
-                <td className="px-4 py-4 text-center border-y border-transparent group-hover:border-gray-200">
-                  <Link
-                    to={`/leaderboard/${habit.id}`}
-                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-50 text-yellow-600 hover:bg-yellow-100 font-bold text-sm transition-colors"
-                  >
-                    #{habit.leaderboardRank}
-                  </Link>
-                </td>
 
                 {/* Action Column (Creator vs Member) */}
                 <td className="px-4 py-4 text-right rounded-r-2xl border-y border-r border-transparent group-hover:border-gray-200">
                   {isCreator ? (
                     <div className="flex items-center justify-end gap-2">
-                      <button className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors">
+                      <button
+                        onClick={() => startEdit(habit)}
+                        className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
+                      >
                         Edit
                       </button>
-                      <button className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors">
-                        Archive
-                      </button>
+                      {!showArchived && (
+                        <button
+                          onClick={() => void handleArchive(habit.id)}
+                          className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
+                        >
+                          Archive
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleDelete(habit.id)}
+                        onClick={() => void handleDelete(habit.id)}
                         className="text-gray-500 hover:text-red-600 text-sm font-medium px-2 py-1 transition-colors"
                       >
                         Delete
@@ -225,7 +384,7 @@ export const HabitsList = () => {
                         View
                       </button>
                       <span className="text-xs text-gray-400 mt-1">
-                        Last: {habit.lastProgressDate}
+                        Habit id: {habit.id}
                       </span>
                     </div>
                   )}

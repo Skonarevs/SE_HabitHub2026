@@ -15,23 +15,11 @@ type TeamUI = {
   memberCount: number;
 };
 
-const mockTeams: TeamUI[] = [
-  {
-    id: '1',
-    name: 'Morning Warriors',
-    notes: 'A team for those who conquer the morning!',
-    chatLink: '/chat/1',
-    inviteCode: 'ABCD1234',
-    membersLink: '/teams/1/members',
-    memberCount: 5,
-  },
-];
-
 export const TeamsPanel = () => {
   const { role } = useAuthStore();
   const isCreator = role === 'Creator';
 
-  const [teams, setTeams] = useState<TeamUI[]>(mockTeams);
+  const [teams, setTeams] = useState<TeamUI[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,8 +31,10 @@ export const TeamsPanel = () => {
           id: team.teamId,
           name: team.name,
           notes: 'No description',
-          chatLink: `/chat/${team.teamId}`,
-          inviteCode: 'N/A',
+          chatLink: isCreator
+            ? `chat/${team.teamId}`
+            : `chat/${team.teamId}`,
+          inviteCode: team.inviteCode ?? 'N/A',
           membersLink: `/teams/${team.teamId}/members`,
           memberCount: 0,
         }));
@@ -152,7 +142,9 @@ export const TeamsPanel = () => {
                 </td>
 
                 <td className="px-4 py-4 text-center text-black text-md font-medium">
-                  <a href={team.chatLink}>Show Chat</a>
+                  <NavLink to={team.chatLink} className="hover:underline">
+                    Show Chat
+                  </NavLink>
                 </td>
 
                 {isCreator && (
