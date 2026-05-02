@@ -13,8 +13,6 @@ export const CreateTeam = () => {
     try {
       setLoading(true);
       await createTeam(teamName);
-
-      // 👉 redirect after success
       navigate('/teams');
     } catch (err) {
       console.error('Failed to create team', err);

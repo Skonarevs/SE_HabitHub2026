@@ -1,4 +1,4 @@
-// 1. Добавили иконку Check для кнопки
+
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { useNotificationStore } from '../../../store/useNotificationStore';
 
