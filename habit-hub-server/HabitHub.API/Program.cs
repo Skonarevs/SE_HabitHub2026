@@ -8,6 +8,7 @@ using HabitHub.Models.Entities;
 using HabitHub.API.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using HabitHub.API.Auth;
+using HabitHub.API.Models.Settings;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,7 @@ builder.Services.AddSwaggerGen();
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer("Server=tcp:habithub-server.database.windows.net,1433;Initial Catalog=HabitHubDB;User ID=habithubadmin;Password=WxFi3Z8ZK2Nw!f!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
+    options.UseSqlServer("Server=tcp:habithub-server.database.windows.net,1433;Initial Catalog=HabitHubDB;User ID=habithubadmin;Password=NewPass123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
@@ -32,6 +33,11 @@ builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+//email configuration
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+
 
 builder.Services.AddCors(options =>
 {

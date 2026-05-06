@@ -13,7 +13,8 @@ export const CreateTeam = () => {
     try {
       setLoading(true);
       await createTeam(teamName);
-      navigate('/teams');
+
+      navigate('/main-creator/teams-creator');
     } catch (err) {
       console.error('Failed to create team', err);
       alert('Failed to create team');
@@ -27,7 +28,7 @@ export const CreateTeam = () => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Create a Team</h2>
         <Link
-          to="/teams/join"
+          to="/main-creator/teams-creator"
           className="text-sm text-blue-600 hover:underline"
         >
           ← Back

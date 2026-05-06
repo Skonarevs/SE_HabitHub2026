@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using HabitHub.API.Exceptions;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 
 namespace HabitHub.API.Services
@@ -16,11 +17,13 @@ namespace HabitHub.API.Services
     {
         private readonly AppDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        IEmailSender _emailSender;
 
-        public AuthService(AppDbContext context, IPasswordHasher<User> passwordHasher)
+        public AuthService(AppDbContext context, IPasswordHasher<User> passwordHasher, IEmailSender emailSender)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _emailSender = emailSender;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -193,7 +196,12 @@ namespace HabitHub.API.Services
 
             await _context.SaveChangesAsync();
 
-            // TODO: Send notification email about password change
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                user.Name,
+                "Your password has been changed",
+                $"Hello {user.Name}, your HabitHub password was changed on {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC. If this wasn't you, please contact support immediately."
+            );
         }
 
         public async Task ChangeEmailAsync(Guid userId, ChangeEmailDto dto, Guid currentSessionId)
