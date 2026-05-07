@@ -4,7 +4,7 @@ import { deleteTeam, getTeamsInfo, leaveTeam } from '../../../api/teamsApi';
 import type { TeamInfo } from '../../../types/teamsTypes';
 
 import { NavLink } from 'react-router-dom';
-import { getTeamMembers } from '../../../api/teamsApi';
+//import { getTeamMembers } from '../../../api/teamsApi';
 
 type TeamUI = {
   id: string;
