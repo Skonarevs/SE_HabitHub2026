@@ -4,11 +4,11 @@ import {
   deleteTeamMessage,
   getTeamMessages,
   sendTeamMessage,
-} from '../../api/chatApi';
-import { useAuthStore } from '../../store/useAuthStore';
-import type { ChatMessage } from '../../types/chatTypes';
+} from '../../../api/chatApi';
+import { useAuthStore } from '../../../store/useAuthStore';
+import type { ChatMessage } from '../../../types/chatTypes';
 
-export const RightPanel = () => {
+export const ChatPanel = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const { role, userName } = useAuthStore();
   const isCreator = role === 'Creator';
@@ -84,9 +84,7 @@ export const RightPanel = () => {
       await deleteTeamMessage(teamId, message.id);
       setMessages((prev) => prev.filter((m) => m.id !== message.id));
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to delete message.'
-      );
+      setError(err instanceof Error ? err.message : 'Failed to delete message.');
     }
   };
 
@@ -109,9 +107,7 @@ export const RightPanel = () => {
             <span>←</span> Back to Teams
           </Link>
           <h2 className="text-2xl font-bold text-gray-800">Team Chat</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Write and manage team messages.
-          </p>
+          <p className="text-gray-500 text-sm mt-1">Write and manage team messages.</p>
         </div>
         <button
           onClick={() => void loadMessages()}
@@ -129,20 +125,13 @@ export const RightPanel = () => {
         ) : (
           <div className="space-y-3">
             {sortedMessages.map((message) => {
-              const canDelete =
-                isCreator ||
-                (userName !== null && message.senderName === userName);
+              const canDelete = isCreator || (userName !== null && message.senderName === userName);
 
               return (
-                <div
-                  key={message.id}
-                  className="bg-white border border-gray-200 rounded-xl p-3"
-                >
+                <div key={message.id} className="bg-white border border-gray-200 rounded-xl p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">
-                        {message.senderName}
-                      </p>
+                      <p className="text-sm font-semibold text-gray-800">{message.senderName}</p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {message.sentAt.toLocaleString()}
                       </p>
@@ -156,9 +145,7 @@ export const RightPanel = () => {
                       </button>
                     )}
                   </div>
-                  <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">{message.content}</p>
                 </div>
               );
             })}

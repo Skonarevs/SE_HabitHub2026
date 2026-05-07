@@ -14,8 +14,7 @@ export const CreateTeam = () => {
       setLoading(true);
       await createTeam(teamName);
 
-      // 👉 redirect after success
-      navigate('/teams');
+      navigate('/main-creator/teams-creator');
     } catch (err) {
       console.error('Failed to create team', err);
       alert('Failed to create team');
@@ -29,8 +28,8 @@ export const CreateTeam = () => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Create a Team</h2>
         <Link
-          to="/teams/join"
-          className="text-sm text-blue-600 hover:underline"
+          to="/main-creator/teams-creator"
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 hover:text-black transition-colors mb-2"
         >
           ← Back
         </Link>
@@ -50,17 +49,19 @@ export const CreateTeam = () => {
           onChange={(e) => setTeamName(e.target.value)}
           type="text"
           placeholder="Enter team name"
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
         />
       </div>
 
       <button
         onClick={handleCreate}
         disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+        className="bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow hover:-translate-y-0.5"
       >
         {loading ? 'Creating...' : 'Create Team'}
       </button>
     </div>
   );
 };
+
+

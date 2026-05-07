@@ -6,6 +6,9 @@ using HabitHub.API.Services;
 
 using HabitHub.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using HabitHub.Data;
 
 namespace HabitHub.API.Controllers
 {
@@ -14,10 +17,14 @@ namespace HabitHub.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IEmailSender _emailSender;
+        AppDbContext _context;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, AppDbContext context, IEmailSender emailSender)
         {
             _authService = authService;
+            _context = context;
+            _emailSender = emailSender;
         }
 
         [HttpPost("register")]
@@ -70,6 +77,33 @@ namespace HabitHub.API.Controllers
             var sessionId = Guid.Parse(User.FindFirst("SessionId")?.Value ?? throw new UnauthorizedAccessException());
             await _authService.ChangeEmailAsync(userId, dto, sessionId);
             return Ok();
+        }
+
+
+        [HttpPost("test-email")]
+        [Authorize]
+        public async Task<IActionResult> TestEmail()
+        {
+            var userId = User.GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            await _emailSender.SendEmailAsync(user.Email, user.Name, "HabitHub Test", "Test message");
+            return Ok("Email sent");
+        }
+
+        [HttpPost("test-email-direct")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestEmailDirect([FromBody] string? testEmail = null)
+        {
+            var toEmail = testEmail ?? "habit.hub.notifications@gmail.com";
+            await _emailSender.SendEmailAsync(
+                toEmail,
+                "Test Recipient",
+                "Direct Test from HabitHub",
+                "This is a direct test email"
+            );
+            return Ok($"Test email sent to {toEmail}");
         }
     }
 }

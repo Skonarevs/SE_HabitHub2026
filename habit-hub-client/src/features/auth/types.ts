@@ -5,7 +5,7 @@ export interface LoginResponse {
   user: User;
 }
 
-//new DTOs
+
 export interface SessionInfoDto {
   sessionId: string;
   createdAt: string;

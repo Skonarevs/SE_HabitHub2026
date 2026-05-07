@@ -105,7 +105,7 @@ export const Register: React.FC = () => {
             <HelpCircle size={22} />
           </Link>
 
-          {/* Name */}
+          
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
               Name <span className="text-red-500">*</span>
@@ -124,7 +124,7 @@ export const Register: React.FC = () => {
             )}
           </div>
 
-          {/* Email */}
+          
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
               Email <span className="text-red-500">*</span>
@@ -164,7 +164,7 @@ export const Register: React.FC = () => {
             </select>
           </div>
 
-          {/* Password */}
+          
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
               Password <span className="text-red-500">*</span>
@@ -196,7 +196,7 @@ export const Register: React.FC = () => {
               </button>
             </div>
 
-            {/* Password hints */}
+            
             <div className="mt-2 space-y-1">
               <p className="text-xs text-gray-400 mb-1">
                 Your password need to include:
@@ -274,3 +274,5 @@ export const Register: React.FC = () => {
     </div>
   );
 };
+
+

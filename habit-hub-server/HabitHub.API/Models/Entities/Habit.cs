@@ -13,6 +13,7 @@
         public Team Team { get; set; }
         public ICollection<HabitEntry> Entries { get; set; } = new List<HabitEntry>();
         public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
+        public TimeOnly? DefaultReminderTime { get; set; }
     }
 
     public enum HabitType { 

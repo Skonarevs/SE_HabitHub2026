@@ -31,10 +31,6 @@ export const LogOutButton: React.FC = () => {
           ></div>
 
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center text-center">
-            {/* <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-5">
-              <AlertCircle className="w-8 h-8 text-red-500" />
-            </div> */}
-
             <h3 className="text-xl font-bold text-gray-900">Sign Out?</h3>
             <p className="text-gray-500 mt-2 text-sm leading-relaxed">
               Are you sure you want to log out? You will need to enter your

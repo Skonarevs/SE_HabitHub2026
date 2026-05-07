@@ -13,6 +13,12 @@ namespace HabitHub.API.Services.Interfaces
         Task LeaveTeamAsync(Guid teamId, Guid userId);
         Task DeleteTeamAsync(Guid teamId, Guid creatorId);
         Task<HabitResponseDto> CreateHabitAsync(Guid teamId, CreateHabitDto dto, Guid creatorId);
+        Task<List<HabitResponseDto>> GetActiveHabitsAsync(Guid teamId, Guid userId);
         Task<List<ArchivedHabitDto>> GetArchivedHabitsAsync(Guid teamId, Guid userId);
+
+        Task<List<TeamResponseDto>> GetTeamsForUserAsync(Guid userId);
+        Task<List<TeamMemberResponseDto>> GetTeamMembersAsync(Guid teamId, Guid requesterId);
+
+        Task<List<HabitResponseDto>> GetTeamHabitsAsync(Guid teamId, Guid userId, string? state);
     }
 }
