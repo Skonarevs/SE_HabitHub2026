@@ -17,5 +17,8 @@ namespace HabitHub.API.Services.Interfaces
         Task<List<ArchivedHabitDto>> GetArchivedHabitsAsync(Guid teamId, Guid userId);
 
         Task<List<TeamResponseDto>> GetTeamsForUserAsync(Guid userId);
+        Task<List<TeamMemberResponseDto>> GetTeamMembersAsync(Guid teamId, Guid requesterId);
+
+        Task<List<HabitResponseDto>> GetTeamHabitsAsync(Guid teamId, Guid userId, string? state);
     }
 }

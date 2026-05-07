@@ -124,6 +124,24 @@ public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto dto)
             return Ok(teams);
         }
 
+        [HttpGet("{teamId}/members")]
+        [Authorize]
+        public async Task<IActionResult> GetTeamMembers(Guid teamId)
+        {
+            var userId = User.GetUserId();
+            var members = await _teamService.GetTeamMembersAsync(teamId, userId);
+            return Ok(members);
+        }
+
+
+        [HttpGet("{teamId}/habits")]
+        public async Task<IActionResult> GetTeamHabits(Guid teamId, [FromQuery] string? state = null)
+        {
+            var userId = User.GetUserId();
+            var habits = await _teamService.GetTeamHabitsAsync(teamId, userId, state);
+            return Ok(habits);
+        }
+
 
 
 

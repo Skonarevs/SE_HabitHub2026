@@ -37,4 +37,13 @@
         public string TeamName { get; set; }
         public string Status { get; set; } 
     }
+
+        public class TeamMemberResponseDto
+        {
+            public Guid UserId { get; set; }
+            public string Name { get; set; }
+            public string Email { get; set; }
+            public DateTime JoinedAt { get; set; }
+            public string Status { get; set; } // "Active", "Left", "Kicked"
+        }
 }

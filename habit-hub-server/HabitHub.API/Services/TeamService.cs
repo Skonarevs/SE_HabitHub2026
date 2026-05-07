@@ -421,6 +421,61 @@ namespace HabitHub.API.Services
             }).ToList();
         }
 
+        public async Task<List<TeamMemberResponseDto>> GetTeamMembersAsync(Guid teamId, Guid requesterId)
+        {
+            var team = await _context.Teams.FindAsync(teamId);
+            if (team == null)
+            {
+                throw new NotFoundException("Team not found");
+            }
+                
+
+            if (team.CreatorId != requesterId)
+            {
+                throw new ForbiddenException("Only the team creator can view team members");
+            }
+                
+
+            var members = await _context.Memberships
+                .Where(m => m.TeamId == teamId && m.Status == MembershipStatus.Active)
+                .Include(m => m.User)
+                .Select(m => new TeamMemberResponseDto
+                {
+                    UserId = m.User.Id,
+                    Name = m.User.Name,
+                    Email = m.User.Email,
+                    JoinedAt = m.JoinedAt,
+                    Status = m.Status.ToString()
+                })
+                .ToListAsync();
+
+            return members;
+        }
+
+        public async Task<List<HabitResponseDto>> GetTeamHabitsAsync(Guid teamId, Guid userId, string? state)
+        {
+            var team = await _context.Teams.FindAsync(teamId);
+            if (team == null)
+            {
+                throw new NotFoundException("Team not found");
+            }
+            bool isMember = await _context.Memberships.AnyAsync(m => m.TeamId == teamId && m.UserId == userId && m.Status == MembershipStatus.Active);
+            if (team.CreatorId != userId && !isMember)
+            {
+                throw new ForbiddenException("Access denied");
+            }
+
+            var query = _context.Habits.Where(h => h.TeamId == teamId);
+            if (!string.IsNullOrEmpty(state) && Enum.TryParse<HabitState>(state, true, out var habitState))
+            {
+                query = query.Where(h => h.State == habitState);
+            }
+                
+
+            var habits = await query.Select(h => MapToHabitResponse(h)).ToListAsync();
+            return habits;
+        }
+
 
     }
 }
