@@ -44,6 +44,43 @@ export const HabitsList = () => {
   );
   const [tempReminderTime, setTempReminderTime] = useState('');
 
+  const getErrorMessage = (err: unknown): string => {
+    // Axios-style error
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const error = err as {
+        response?: {
+          status?: number;
+          data?: { message?: string };
+        };
+      };
+
+      const status = error.response?.status;
+      const apiMessage = error.response?.data?.message;
+
+      switch (status) {
+        case 400:
+          return apiMessage || 'Bad request.';
+        case 401:
+          return 'You are not authorized.';
+        case 403:
+          return 'Access denied.';
+        case 404:
+          return 'Habits not found.';
+        case 500:
+          return 'Server error. Please try again later.';
+        default:
+          return apiMessage || 'Something went wrong.';
+      }
+    }
+
+    // Standard JS Error
+    if (err instanceof Error) {
+      return err.message;
+    }
+
+    return 'Unexpected error occurred.';
+  };
+
   const loadHabits = async () => {
     if (!teamId) {
       setError('Team id is missing.');
@@ -54,14 +91,16 @@ export const HabitsList = () => {
     try {
       setLoading(true);
       setError(null);
+
       const data = showArchived
         ? await getArchivedHabits(teamId)
         : await getActiveHabits(teamId);
+
       setHabits(data);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to load habits.';
-      setError(message);
+      console.error('Failed to load habits:', err);
+
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -73,11 +112,15 @@ export const HabitsList = () => {
 
   const handleArchive = async (id: string) => {
     if (!window.confirm('Archive this habit?')) return;
+
     try {
       await archiveHabit(id);
+
       setHabits((prev) => prev.filter((h) => h.id !== id));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to archive habit.');
+      console.error('Archive failed:', err);
+
+      alert(getErrorMessage(err));
     }
   };
 
@@ -222,7 +265,7 @@ export const HabitsList = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden">
-      {/* Header */}
+      
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="flex flex-col items-start">
           <Link
@@ -267,9 +310,9 @@ export const HabitsList = () => {
         </div>
       </div>
 
-      {/* Table & Edit Form Area */}
+      
       <div className="overflow-x-auto">
-        {/* EDIT HABIT FORM */}
+        
         {editingHabit && (
           <div className="mb-6 border border-gray-200 rounded-2xl p-4 bg-gray-50">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -431,7 +474,7 @@ export const HabitsList = () => {
                   </td>
                 )}
 
-                {/* --- REMINDER COLUMN --- */}
+                
                 <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
                   {isCreator ? (
                     // CREATOR VIEW
@@ -479,7 +522,7 @@ export const HabitsList = () => {
                     <div className="flex items-center justify-end gap-3">
                       {reminderTimes[habit.id] ? (
                         <>
-                          {/* Member sees time (crossed out if disabled) */}
+                          
                           <span
                             className={`text-sm font-semibold transition-all ${
                               disabledReminders[habit.id]
@@ -487,9 +530,9 @@ export const HabitsList = () => {
                                 : 'text-gray-700'
                             }`}
                           >
-                            ⏰ {reminderTimes[habit.id]}
+                            {reminderTimes[habit.id]}
                           </span>
-                          {/* Member Disable/Enable Toggle */}
+                          
                           <button
                             onClick={() => toggleDisableReminder(habit.id)}
                             className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border ${
@@ -563,3 +606,5 @@ export const HabitsList = () => {
     </div>
   );
 };
+
+

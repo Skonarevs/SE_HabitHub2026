@@ -1,7 +1,7 @@
 import api from './axiosInstance';
 import axios from 'axios';
 import type { SessionInfo, SessionInfoDto } from '../features/auth/types';
-//helper
+
 const mapSessionDto = (dto: SessionInfoDto): SessionInfo => ({
   sessionId: dto.sessionId,
   createdAt: new Date(dto.createdAt),
@@ -10,7 +10,7 @@ const mapSessionDto = (dto: SessionInfoDto): SessionInfo => ({
   status: dto.status,
 });
 
-//new function
+
 
 export const getActiveSessions = async (): Promise<SessionInfo[]> => {
   try {

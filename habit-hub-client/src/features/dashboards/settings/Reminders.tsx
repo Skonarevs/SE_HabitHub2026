@@ -85,7 +85,7 @@ export const Reminders = () => {
               className="flex flex-col justify-between p-6 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all group"
             >
               <div>
-                {/* Top Row: Time & Team Name */}
+                
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
                     <Clock size={14} />
@@ -100,13 +100,13 @@ export const Reminders = () => {
                   )}
                 </div>
 
-                {/* Habit Name */}
+                
                 <h3 className="font-bold text-gray-900 text-xl leading-tight mb-6">
                   {reminder.habitName}
                 </h3>
               </div>
 
-              {/* Bottom Row: Actions */}
+              
               <div className="flex justify-end mt-auto pt-4 border-t border-gray-50">
                 <button
                   onClick={() => handleLogHabit(reminder.habitId)}
@@ -122,3 +122,5 @@ export const Reminders = () => {
     </div>
   );
 };
+
+

@@ -1,14 +1,37 @@
 import type {
   ArchivedHabitResponseDto,
-  CreateHabitDto, //added please
-  HabitResponseDto, //added please
-  TeamHabitInfo, //added please
-  TeamInfo, //added please
-  TeamResponseDto, //added please
+  CreateHabitDto,
+  HabitResponseDto,
+  TeamHabitInfo,
+  TeamInfo,
+  TeamResponseDto,
   UpdateHabitDto,
-} from '../types/teamsTypes'; //added please
+} from '../types/teamsTypes';
 import api from './axiosInstance';
 import axios from 'axios';
+
+const getAxiosErrorMessage = (error: unknown, fallback: string): string => {
+  if (!axios.isAxiosError(error)) {
+    return fallback;
+  }
+
+  const status = error.response?.status;
+  const serverData = error.response?.data;
+
+  const serverMessage =
+    typeof serverData === 'string'
+      ? serverData
+      : serverData && typeof serverData === 'object' && 'error' in serverData
+        ? String(serverData.error)
+        : null;
+
+  return (
+    serverMessage ||
+    (status
+      ? `${fallback} (HTTP ${status}).`
+      : `${fallback} Please check your connection.`)
+  );
+};
 
 const mapTeamDto = (dto: TeamResponseDto): TeamInfo => ({
   teamId: dto.id,
@@ -24,16 +47,16 @@ const getTeamDetails = async (teamId: string): Promise<TeamResponseDto> => {
 };
 
 const mapHabitDto = (dto: HabitResponseDto): TeamHabitInfo => ({
-  //added please
-  id: dto.id, //added please
-  name: dto.name, //added please
-  goal: dto.goal, //added please
-  habitType: dto.habitType, //added please
-  unit: dto.unit ?? undefined, //added please
-  expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined, //added please
-  state: dto.state, //added please
-  teamId: dto.teamId, //added please
-}); //added please
+ 
+  id: dto.id,
+  name: dto.name,
+  goal: dto.goal,
+  habitType: dto.habitType,
+  unit: dto.unit ?? undefined,
+  expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
+  state: dto.state,
+  teamId: dto.teamId,
+});
 
 const mapArchivedHabitDto = (
   dto: ArchivedHabitResponseDto,
@@ -48,7 +71,7 @@ const mapArchivedHabitDto = (
   state: 'Archived',
   teamId,
 });
-// Add this interface to your types file or at the top of your API file
+
 export interface ReminderResponseDto {
   habitId: string;
   habitName: string;
@@ -57,14 +80,49 @@ export interface ReminderResponseDto {
   teamName?: string; // Optional in case some habits are personal
 }
 
+export interface TeamMemberDto {
+  userId: string;
+  name: string;
+  email: string;
+  joinedAt: string;
+  status: string;
+}
+
 export const getUserReminders = async (): Promise<ReminderResponseDto[]> => {
   try {
-    // Replace '/reminders' with your actual C# controller route for getting user reminders
     const response = await api.get<ReminderResponseDto[]>('/reminders');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch reminders', error);
     throw new Error('Failed to load reminders.');
+  }
+};
+
+export const leaveTeam = async (teamId: string): Promise<void> => {
+  try {
+    await api.post(`/teams/${teamId}/leave`);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to load teams (HTTP ${status}).`
+            : 'Failed to load teams. Please check your connection.')
+      );
+    }
+
+    throw new Error('Unexpected error while loading teams.');
   }
 };
 
@@ -160,44 +218,21 @@ export const createTeam = async (name: string) => {
 export const getActiveHabits = async (
   teamId: string
 ): Promise<TeamHabitInfo[]> => {
-  //added please
   try {
-    //added please
     const response = await api.get<HabitResponseDto[]>(
       `/teams/${teamId}/habits`,
       {
-        //added please
-        params: { state: 'active' }, //added please
+        params: { state: 'active' },
       }
-    ); //added please
-    return response.data.map(mapHabitDto); //added please
+    );
+
+    return response.data.map(mapHabitDto);
   } catch (error) {
-    //added please
-    if (axios.isAxiosError(error)) {
-      //added please
-      const status = error.response?.status; //added please
-      const serverData = error.response?.data; //added please
-
-      const serverMessage = //added please
-        typeof serverData === 'string' //added please
-          ? serverData //added please
-          : serverData &&
-              typeof serverData === 'object' &&
-              'error' in serverData //added please
-            ? String(serverData.error) //added please
-            : null; //added please
-
-      throw new Error( //added please
-        serverMessage || //added please
-          (status //added please
-            ? `Failed to load active habits (HTTP ${status}).` //added please
-            : 'Failed to load active habits. Please check your connection.') //added please
-      ); //added please
-    } //added please
-
-    throw new Error('Unexpected error while loading active habits.'); //added please
-  } //added please
-}; //added please
+    throw new Error(
+      getAxiosErrorMessage(error, 'Failed to load active habits')
+    );
+  }
+};
 
 export const getArchivedHabits = async (
   teamId: string
@@ -212,7 +247,29 @@ export const getArchivedHabits = async (
 
     return response.data.map((habit) => mapArchivedHabitDto(habit, teamId));
   } catch (error) {
+    throw new Error(
+      getAxiosErrorMessage(error, 'Failed to load archived habits')
+    );
+  }
+};
+
+export const createTeamHabit = async (
+ 
+  teamId: string,
+  dto: CreateHabitDto
+): Promise<TeamHabitInfo> => {
+ 
+  try {
+   
+    const response = await api.post<HabitResponseDto>(
+      `/teams/${teamId}/habits`,
+      dto
+    );
+    return mapHabitDto(response.data);
+  } catch (error) {
+   
     if (axios.isAxiosError(error)) {
+     
       const status = error.response?.status;
       const serverData = error.response?.data;
 
@@ -228,55 +285,14 @@ export const getArchivedHabits = async (
       throw new Error(
         serverMessage ||
           (status
-            ? `Failed to load archived habits (HTTP ${status}).`
-            : 'Failed to load archived habits. Please check your connection.')
+            ? `Failed to create habit (HTTP ${status}).`
+            : 'Failed to create habit. Please check your connection.')
       );
     }
 
-    throw new Error('Unexpected error while loading archived habits.');
+    throw new Error('Unexpected error while creating habit.');
   }
 };
-
-export const createTeamHabit = async (
-  //added please
-  teamId: string, //added please
-  dto: CreateHabitDto //added please
-): Promise<TeamHabitInfo> => {
-  //added please
-  try {
-    //added please
-    const response = await api.post<HabitResponseDto>(
-      `/teams/${teamId}/habits`,
-      dto
-    ); //added please
-    return mapHabitDto(response.data); //added please
-  } catch (error) {
-    //added please
-    if (axios.isAxiosError(error)) {
-      //added please
-      const status = error.response?.status; //added please
-      const serverData = error.response?.data; //added please
-
-      const serverMessage = //added please
-        typeof serverData === 'string' //added please
-          ? serverData //added please
-          : serverData &&
-              typeof serverData === 'object' &&
-              'error' in serverData //added please
-            ? String(serverData.error) //added please
-            : null; //added please
-
-      throw new Error( //added please
-        serverMessage || //added please
-          (status //added please
-            ? `Failed to create habit (HTTP ${status}).` //added please
-            : 'Failed to create habit. Please check your connection.') //added please
-      ); //added please
-    } //added please
-
-    throw new Error('Unexpected error while creating habit.'); //added please
-  } //added please
-}; //added please
 
 export const updateHabit = async (
   habitId: string,
@@ -401,12 +417,13 @@ export const deleteTeam = async (teamId: string): Promise<void> => {
   }
 };
 
-export const getTeamMembers = async (teamId: string): Promise<string[]> => {
+export const getTeamMembers = async (
+  teamId: string
+): Promise<TeamMemberDto[]> => {
   try {
-    const response = await api.post<{ members: string[] }>(
-      `/teams/${teamId}/members`
-    );
-    return response.data.members;
+    const response = await api.get<TeamMemberDto[]>(`/teams/${teamId}/members`);
+    console.log(response.data);
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
@@ -454,5 +471,33 @@ export const toggleHabitReminder = async (
   } catch (error) {
     console.error('Failed to toggle reminder', error);
     throw new Error('Failed to update reminder status.');
+  }
+};
+
+export const kickTeamMember = async (
+  teamId: string,
+  memberId: string
+): Promise<void> => {
+  try {
+    await api.post(`/teams/${teamId}/members/${memberId}/kick`);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData?.message || serverData?.error || null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to remove member (HTTP ${status}).`
+            : 'Failed to remove member. Please check your connection.')
+      );
+    }
+
+    throw new Error('Unexpected error while removing member.');
   }
 };

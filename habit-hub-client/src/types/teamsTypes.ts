@@ -32,13 +32,13 @@ export interface MembershipResponseDto {
   status: string;
 }
 
-export interface CreateHabitDto { //added please
-  name: string; //added please
-  goal: string; //added please
-  habitType: 'Binary' | 'Quantitative'; //added please
-  unit: string; //added please
-  expiryDate?: string; //added please
-} //added please
+export interface CreateHabitDto {
+  name: string;
+  goal: string;
+  habitType: 'Binary' | 'Quantitative';
+  unit: string;
+  expiryDate?: string;
+}
 
 export interface UpdateHabitDto {
   name?: string;
@@ -48,17 +48,17 @@ export interface UpdateHabitDto {
   expiryDate?: string;
 }
 
-export interface HabitResponseDto { //added please
-  id: string; //added please
-  name: string; //added please
-  goal: string; //added please
-  habitType: string; //added please
-  unit?: string | null; //added please
-  expiryDate?: string | null; //added please
-  state: string; //added please
-  teamId: string; //added please
-  teamName?: string | null; //added please
-} //added please
+export interface HabitResponseDto {
+  id: string;
+  name: string;
+  goal: string;
+  habitType: string;
+  unit?: string | null;
+  expiryDate?: string | null;
+  state: string;
+  teamId: string;
+  teamName?: string | null;
+}
 
 export interface ArchivedHabitResponseDto {
   id: string;
@@ -70,13 +70,13 @@ export interface ArchivedHabitResponseDto {
   archivedAt?: string | null;
 }
 
-export interface TeamHabitInfo { //added please
-  id: string; //added please
-  name: string; //added please
-  goal: string; //added please
-  habitType: string; //added please
-  unit?: string; //added please
-  expiryDate?: Date; //added please
-  state: string; //added please
-  teamId: string; //added please
-} //added please
+export interface TeamHabitInfo {
+  id: string;
+  name: string;
+  goal: string;
+  habitType: string;
+  unit?: string;
+  expiryDate?: Date;
+  state: string;
+  teamId: string;
+}

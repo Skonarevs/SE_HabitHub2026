@@ -191,3 +191,5 @@ export const RightPanel = () => {
     </div>
   );
 };
+
+

@@ -88,7 +88,7 @@ export const Login: React.FC = () => {
             <HelpCircle size={22} />
           </Link>
 
-          {/* Email */}
+          
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
               Email <span className="text-red-500">*</span>
@@ -115,7 +115,7 @@ export const Login: React.FC = () => {
             )}
           </div>
 
-          {/* Password */}
+          
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
               Password <span className="text-red-500">*</span>
@@ -146,7 +146,7 @@ export const Login: React.FC = () => {
             )}
           </div>
 
-          {/* User type */}
+          
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">
               I am logging in as
@@ -167,7 +167,7 @@ export const Login: React.FC = () => {
             )}
           </div>
 
-          {/* Submit */}
+          
           <Button
             type="submit"
             isLoading={isSubmitting}
@@ -190,3 +190,5 @@ export const Login: React.FC = () => {
     </div>
   );
 };
+
+

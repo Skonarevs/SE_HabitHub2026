@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { getTeamMembers } from '../../../api/teamsApi';
+import { getTeamMembers, kickTeamMember } from '../../../api/teamsApi';
 
-// Define a type for your members
+
 type MemberUI = {
   id: string;
   name: string;
+  email?: string;
 };
 
 export const MembersList = () => {
@@ -18,6 +19,26 @@ export const MembersList = () => {
   const [members, setMembers] = useState<MemberUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleKickMember = async (memberId: string) => {
+    if (!teamId) return;
+
+    const confirmed = window.confirm(
+      'Are you sure you want to remove this member from the team?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await kickTeamMember(teamId, memberId);
+
+      setMembers((prev) => prev.filter((member) => member.id !== memberId));
+    } catch (err) {
+      console.error('Failed to remove member:', err);
+
+      alert(err instanceof Error ? err.message : 'Failed to remove member.');
+    }
+  };
 
   // Dynamic back path based on role
   const backToTeamsPath = isCreator
@@ -35,12 +56,12 @@ export const MembersList = () => {
       try {
         setLoading(true);
         // Assuming getTeamMembers returns an array of strings (names or IDs)
-        const data: string[] = await getTeamMembers(teamId);
+        const data = await getTeamMembers(teamId);
 
-        // Map the strings to our MemberUI objects
-        const mapped: MemberUI[] = data.map((memberName, index) => ({
-          id: memberName || String(index),
-          name: memberName,
+        const mapped: MemberUI[] = data.map((member) => ({
+          id: member.userId,
+          name: member.name,
+          email: member.email,
         }));
 
         setMembers(mapped);
@@ -65,7 +86,7 @@ export const MembersList = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden">
-      {/* Header Area */}
+      
       <div className="mb-6">
         <Link
           to={backToTeamsPath}
@@ -81,7 +102,7 @@ export const MembersList = () => {
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      {/* Members List Area */}
+      
       <div className="flex-1 overflow-y-auto border border-gray-100 rounded-2xl p-4 bg-gray-50">
         {members.length === 0 ? (
           <p className="text-gray-400 italic">No members found.</p>
@@ -93,7 +114,7 @@ export const MembersList = () => {
                 className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-center gap-4">
-                  {/* Avatar Placeholder */}
+                  
                   <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
                     {member.name.charAt(0).toUpperCase()}
                   </div>
@@ -101,14 +122,19 @@ export const MembersList = () => {
                     {member.name}
                   </span>
                 </div>
+                <div>
+                  <span>
+                    {member.email ? member.email : 'No email provided'}
+                  </span>
+                </div>
 
-                {/* Optional: Add a remove button for Creators */}
+                
                 {isCreator && (
                   <button
                     className="text-sm text-red-500 hover:text-red-700 font-medium px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                    onClick={() => console.log(`Remove ${member.id}`)}
+                    onClick={() => handleKickMember(member.id)}
                   >
-                    Remove
+                    Kick
                   </button>
                 )}
               </li>
@@ -119,3 +145,5 @@ export const MembersList = () => {
     </div>
   );
 };
+
+

@@ -39,7 +39,7 @@ export const JoinTeams = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100">
-      {/* Header with Back link */}
+      
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Join a Team</h2>
         <Link
@@ -54,14 +54,14 @@ export const JoinTeams = () => {
         Enter the invite code to join a team.
       </p>
 
-      {/* Error Message Display */}
+      
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">
           {error}
         </div>
       )}
 
-      {/* Inline label + input */}
+      
       <div className="flex items-center gap-4 mb-6">
         <label className="font-medium text-gray-700 whitespace-nowrap">
           Invite code:
@@ -90,3 +90,5 @@ export const JoinTeams = () => {
     </div>
   );
 };
+
+

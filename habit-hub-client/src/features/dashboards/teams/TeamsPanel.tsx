@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { deleteTeam, getTeamsInfo } from '../../../api/teamsApi';
+import { deleteTeam, getTeamsInfo, leaveTeam } from '../../../api/teamsApi';
 import type { TeamInfo } from '../../../types/teamsTypes';
 
 import { NavLink } from 'react-router-dom';
+import { getTeamMembers } from '../../../api/teamsApi';
 
 type TeamUI = {
   id: string;
@@ -26,7 +27,27 @@ export const TeamsPanel = () => {
     const fetchTeams = async () => {
       try {
         const data: TeamInfo[] = await getTeamsInfo();
+        console.log('TEAMS FROM API:', data);
 
+        // const enriched = await Promise.all(
+        //   data.map(async (team) => {
+        //     const members = await getTeamMembers(team.teamId);
+
+        //     return {
+        //       id: team.teamId,
+        //       name: team.name,
+        //       notes: 'No description',
+        //       chatLink: isCreator
+        //         ? `/main-creator/teams-creator/chat/${team.teamId}`
+        //         : `/main-member/teams-member/chat/${team.teamId}`,
+        //       inviteCode: team.inviteCode ?? 'N/A',
+        //       membersLink: isCreator
+        //         ? `/main-creator/teams-creator/teams/${team.teamId}/members`
+        //         : `/main-member/teams-member/teams/${team.teamId}/members`,
+        //       memberCount: members.length,
+        //     };
+        //   })
+        // );
         const mapped: TeamUI[] = data.map((team) => ({
           id: team.teamId,
           name: team.name,
@@ -38,7 +59,7 @@ export const TeamsPanel = () => {
           membersLink: isCreator
             ? `/main-creator/teams-creator/teams/${team.teamId}/members`
             : `/main-member/teams-member/teams/${team.teamId}/members`,
-          memberCount: 0,
+          memberCount: 0, // temporary
         }));
 
         setTeams(mapped);
@@ -52,9 +73,15 @@ export const TeamsPanel = () => {
     fetchTeams();
   }, []);
 
-  const handleLeaveTeam = (id: string) => {
-    console.log(`Leaving team: ${id}`);
-    setTeams((prev) => prev.filter((team) => team.id !== id));
+  const handleLeaveTeam = async (id: string) => {
+    try {
+      await leaveTeam(id);
+      console.log(`Left team: ${id}`);
+      setTeams((prev) => prev.filter((team) => team.id !== id));
+    } catch (error) {
+      console.error('Failed to leave team:', error);
+      alert('Failed to leave team');
+    }
   };
 
   const handleDeleteTeam = async (id: string, name: string) => {
@@ -84,7 +111,6 @@ export const TeamsPanel = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden">
-      {/* Header */}
       <div className="mb-6 flex justify-between items-end">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
@@ -108,7 +134,6 @@ export const TeamsPanel = () => {
         </NavLink>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-separate border-spacing-y-3">
           <thead>
@@ -159,7 +184,6 @@ export const TeamsPanel = () => {
                 </td>
                 {isCreator && (
                   <>
-                    {/* Highlighted Invite Code */}
                     <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                       <div className="inline-flex items-center justify-center bg-pink-50 border border-pink-200 text-pink-700 px-3 py-1.5 rounded-xl shadow-sm">
                         <span className="font-mono text-sm font-bold tracking-wider">
@@ -168,7 +192,6 @@ export const TeamsPanel = () => {
                       </div>
                     </td>
 
-                    {/* Highlighted Members Link */}
                     <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                       <NavLink
                         to={team.membersLink}

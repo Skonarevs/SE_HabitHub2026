@@ -1,4 +1,4 @@
-﻿import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { LogOutButton } from '../../components/ui/LogOutButton';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useNotificationStore } from '../../store/useNotificationStore';
@@ -97,3 +97,5 @@ export const Sidebar = () => {
     </aside>
   );
 };
+
+
