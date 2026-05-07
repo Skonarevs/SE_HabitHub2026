@@ -99,23 +99,6 @@ public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto dto)
             return CreatedAtAction(nameof(HabitsController.GetProgress), "Habits", new { habitId = habit.Id }, habit);
         }
 
-        [HttpGet("{teamId}/habits")]
-        public async Task<IActionResult> GetArchivedHabits(Guid teamId, [FromQuery] string state)
-        {
-            var userId = User.GetUserId();
-            if (state?.ToLower() == "active")
-            {
-                var active = await _teamService.GetActiveHabitsAsync(teamId, userId);
-                return Ok(active);
-            }
-            if (state?.ToLower() == "archived")
-            {
-                var archived = await _teamService.GetArchivedHabitsAsync(teamId, userId);
-                return Ok(archived);
-            }
-            return BadRequest("Invalid state parameter.");
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetTeams()
         {
