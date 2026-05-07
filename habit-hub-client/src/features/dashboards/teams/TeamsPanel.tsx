@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { getTeamsInfo } from '../../../api/teamsApi';
+import { deleteTeam, getTeamsInfo } from '../../../api/teamsApi';
 import type { TeamInfo } from '../../../types/teamsTypes';
 
 import { NavLink } from 'react-router-dom';
@@ -32,10 +32,12 @@ export const TeamsPanel = () => {
           name: team.name,
           notes: 'No description',
           chatLink: isCreator
-            ? `chat/${team.teamId}`
-            : `chat/${team.teamId}`,
+            ? `/main-creator/teams-creator/chat/${team.teamId}`
+            : `/main-member/teams-member/chat/${team.teamId}`,
           inviteCode: team.inviteCode ?? 'N/A',
-          membersLink: `/teams/${team.teamId}/members`,
+          membersLink: isCreator
+            ? `/main-creator/teams-creator/teams/${team.teamId}/members`
+            : `/main-member/teams-member/teams/${team.teamId}/members`,
           memberCount: 0,
         }));
 
@@ -55,12 +57,18 @@ export const TeamsPanel = () => {
     setTeams((prev) => prev.filter((team) => team.id !== id));
   };
 
-  const handleDeleteTeam = (id: string, name: string) => {
+  const handleDeleteTeam = async (id: string, name: string) => {
     if (
       window.confirm(
         `Are you absolutely sure you want to delete "${name}"? This cannot be undone.`
       )
     ) {
+      try {
+        await deleteTeam(id);
+      } catch (error) {
+        console.error('Failed to delete team:', error);
+        alert('Failed to delete team');
+      }
       console.log(`Deleting team: ${id}`);
       setTeams((prev) => prev.filter((team) => team.id !== id));
     }
@@ -89,7 +97,11 @@ export const TeamsPanel = () => {
           </p>
         </div>
         <NavLink
-          to={isCreator ? 'create-team' : 'join-team'}
+          to={
+            isCreator
+              ? '/main-creator/teams-creator/create-team'
+              : '/main-member/teams-member/join-team'
+          }
           className="bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow hover:-translate-y-0.5"
         >
           {isCreator ? '+ Create a New Team' : '+ Join a Team'}
@@ -132,21 +144,19 @@ export const TeamsPanel = () => {
                   <NavLink
                     to={
                       isCreator
-                        ? `habits-creator/${team.id}`
-                        : `habits-member/${team.id}`
+                        ? `/main-creator/teams-creator/habits-creator/${team.id}`
+                        : `/main-member/teams-member/habits-member/${team.id}`
                     }
                     className="inline-flex items-center justify-center bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 hover:bg-black hover:shadow-md hover:-translate-y-1 active:translate-y-0"
                   >
                     View Habits
                   </NavLink>
                 </td>
-
                 <td className="px-4 py-4 text-center text-black text-md font-medium">
                   <NavLink to={team.chatLink} className="hover:underline">
                     Show Chat
                   </NavLink>
                 </td>
-
                 {isCreator && (
                   <>
                     {/* Highlighted Invite Code */}
@@ -160,15 +170,15 @@ export const TeamsPanel = () => {
 
                     {/* Highlighted Members Link */}
                     <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
-                      <a
-                        href={team.membersLink}
+                      <NavLink
+                        to={team.membersLink}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-black px-3 py-1.5 rounded-xl transition-colors"
                       >
                         Members
                         <span className="bg-blue-100 text-black py-0.5 px-2 rounded-full text-xs">
                           {team.memberCount}
                         </span>
-                      </a>
+                      </NavLink>
                     </td>
                   </>
                 )}

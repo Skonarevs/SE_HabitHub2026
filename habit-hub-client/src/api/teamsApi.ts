@@ -23,7 +23,8 @@ const getTeamDetails = async (teamId: string): Promise<TeamResponseDto> => {
   return response.data;
 };
 
-const mapHabitDto = (dto: HabitResponseDto): TeamHabitInfo => ({ //added please
+const mapHabitDto = (dto: HabitResponseDto): TeamHabitInfo => ({
+  //added please
   id: dto.id, //added please
   name: dto.name, //added please
   goal: dto.goal, //added please
@@ -47,6 +48,25 @@ const mapArchivedHabitDto = (
   state: 'Archived',
   teamId,
 });
+// Add this interface to your types file or at the top of your API file
+export interface ReminderResponseDto {
+  habitId: string;
+  habitName: string;
+  enabled: boolean;
+  reminderTime: string;
+  teamName?: string; // Optional in case some habits are personal
+}
+
+export const getUserReminders = async (): Promise<ReminderResponseDto[]> => {
+  try {
+    // Replace '/reminders' with your actual C# controller route for getting user reminders
+    const response = await api.get<ReminderResponseDto[]>('/reminders');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch reminders', error);
+    throw new Error('Failed to load reminders.');
+  }
+};
 
 export const getTeamsInfo = async (): Promise<TeamInfo[]> => {
   try {
@@ -96,27 +116,74 @@ export const getTeamsInfo = async (): Promise<TeamInfo[]> => {
     throw new Error('Unexpected error while loading teams.');
   }
 };
+export const joinTeam = async (data: { code: string }): Promise<void> => {
+  try {
+    const response = await api.post('/teams/join', data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      if (status === 400 || status === 404) {
+        throw new Error(
+          serverMessage || 'Invalid invite code. Please check and try again.'
+        );
+      }
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to join team (HTTP ${status}).`
+            : 'Failed to join team. Please check your connection.')
+      );
+    }
+
+    throw new Error('Unexpected error while joining team.');
+  }
+};
 
 export const createTeam = async (name: string) => {
   const response = await api.post('/teams', { name: name });
   return response.data;
 };
 
-export const getActiveHabits = async (teamId: string): Promise<TeamHabitInfo[]> => { //added please
-  try { //added please
-    const response = await api.get<HabitResponseDto[]>(`/teams/${teamId}/habits`, { //added please
-      params: { state: 'active' }, //added please
-    }); //added please
+export const getActiveHabits = async (
+  teamId: string
+): Promise<TeamHabitInfo[]> => {
+  //added please
+  try {
+    //added please
+    const response = await api.get<HabitResponseDto[]>(
+      `/teams/${teamId}/habits`,
+      {
+        //added please
+        params: { state: 'active' }, //added please
+      }
+    ); //added please
     return response.data.map(mapHabitDto); //added please
-  } catch (error) { //added please
-    if (axios.isAxiosError(error)) { //added please
+  } catch (error) {
+    //added please
+    if (axios.isAxiosError(error)) {
+      //added please
       const status = error.response?.status; //added please
       const serverData = error.response?.data; //added please
 
       const serverMessage = //added please
         typeof serverData === 'string' //added please
           ? serverData //added please
-          : serverData && typeof serverData === 'object' && 'error' in serverData //added please
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData //added please
             ? String(serverData.error) //added please
             : null; //added please
 
@@ -132,11 +199,16 @@ export const getActiveHabits = async (teamId: string): Promise<TeamHabitInfo[]> 
   } //added please
 }; //added please
 
-export const getArchivedHabits = async (teamId: string): Promise<TeamHabitInfo[]> => {
+export const getArchivedHabits = async (
+  teamId: string
+): Promise<TeamHabitInfo[]> => {
   try {
-    const response = await api.get<ArchivedHabitResponseDto[]>(`/teams/${teamId}/habits`, {
-      params: { state: 'archived' },
-    });
+    const response = await api.get<ArchivedHabitResponseDto[]>(
+      `/teams/${teamId}/habits`,
+      {
+        params: { state: 'archived' },
+      }
+    );
 
     return response.data.map((habit) => mapArchivedHabitDto(habit, teamId));
   } catch (error) {
@@ -147,7 +219,9 @@ export const getArchivedHabits = async (teamId: string): Promise<TeamHabitInfo[]
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
 
@@ -163,22 +237,32 @@ export const getArchivedHabits = async (teamId: string): Promise<TeamHabitInfo[]
   }
 };
 
-export const createTeamHabit = async ( //added please
+export const createTeamHabit = async (
+  //added please
   teamId: string, //added please
   dto: CreateHabitDto //added please
-): Promise<TeamHabitInfo> => { //added please
-  try { //added please
-    const response = await api.post<HabitResponseDto>(`/teams/${teamId}/habits`, dto); //added please
+): Promise<TeamHabitInfo> => {
+  //added please
+  try {
+    //added please
+    const response = await api.post<HabitResponseDto>(
+      `/teams/${teamId}/habits`,
+      dto
+    ); //added please
     return mapHabitDto(response.data); //added please
-  } catch (error) { //added please
-    if (axios.isAxiosError(error)) { //added please
+  } catch (error) {
+    //added please
+    if (axios.isAxiosError(error)) {
+      //added please
       const status = error.response?.status; //added please
       const serverData = error.response?.data; //added please
 
       const serverMessage = //added please
         typeof serverData === 'string' //added please
           ? serverData //added please
-          : serverData && typeof serverData === 'object' && 'error' in serverData //added please
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData //added please
             ? String(serverData.error) //added please
             : null; //added please
 
@@ -199,7 +283,10 @@ export const updateHabit = async (
   dto: UpdateHabitDto
 ): Promise<TeamHabitInfo> => {
   try {
-    const response = await api.patch<HabitResponseDto>(`/habits/${habitId}`, dto);
+    const response = await api.patch<HabitResponseDto>(
+      `/habits/${habitId}`,
+      dto
+    );
     return mapHabitDto(response.data);
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -209,7 +296,9 @@ export const updateHabit = async (
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
 
@@ -236,7 +325,9 @@ export const archiveHabit = async (habitId: string): Promise<void> => {
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
 
@@ -263,7 +354,9 @@ export const deleteHabit = async (habitId: string): Promise<void> => {
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
 
@@ -276,5 +369,90 @@ export const deleteHabit = async (habitId: string): Promise<void> => {
     }
 
     throw new Error('Unexpected error while deleting habit.');
+  }
+};
+
+export const deleteTeam = async (teamId: string): Promise<void> => {
+  try {
+    await api.delete(`/teams/${teamId}`);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to delete team (HTTP ${status}).`
+            : 'Failed to delete team. Please check your connection.')
+      );
+    }
+
+    throw new Error('Unexpected error while deleting team.');
+  }
+};
+
+export const getTeamMembers = async (teamId: string): Promise<string[]> => {
+  try {
+    const response = await api.post<{ members: string[] }>(
+      `/teams/${teamId}/members`
+    );
+    return response.data.members;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to get team (HTTP ${status}).`
+            : 'Failed to get team. Please check your connection.')
+      );
+    }
+
+    throw new Error('Unexpected error while getting team.');
+  }
+};
+
+export const setHabitReminder = async (
+  habitId: string,
+  reminderTime: string
+): Promise<void> => {
+  try {
+    await api.patch(`/habits/${habitId}/reminder`, { reminderTime });
+  } catch (error) {
+    console.error('Failed to set reminder', error);
+    throw new Error('Failed to save reminder to server.');
+  }
+};
+
+export const toggleHabitReminder = async (
+  habitId: string,
+  enabled: boolean
+): Promise<void> => {
+  try {
+    await api.patch(`/habits/${habitId}/reminder/enabled`, { enabled });
+  } catch (error) {
+    console.error('Failed to toggle reminder', error);
+    throw new Error('Failed to update reminder status.');
   }
 };
