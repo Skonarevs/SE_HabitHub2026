@@ -1,0 +1,9 @@
+@echo off
+echo Running tests with coverage...
+dotnet test --collect:"XPlat Code Coverage"
+
+echo Generating report...
+reportgenerator -reports:"**/TestResults/**/coverage.cobertura.xml" -targetdir:"coverage-report" -reporttypes:Html
+
+echo Opening report...
+start coverage-report\index.html

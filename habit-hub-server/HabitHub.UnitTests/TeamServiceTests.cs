@@ -69,7 +69,7 @@ namespace HabitHub.UnitTests
                 Name = "Test Team",
                 CreatorId = creatorId,
                 Chat = new TeamChat(),
-                CreatedAt = DateTime.UtcNow
+                //CreatedAt = DateTime.UtcNow
             };
             db.Teams.Add(team);
 
