@@ -159,21 +159,35 @@ namespace HabitHub.API.Services
         public async Task<List<HabitEntryResponseDto>> GetProgressAsync(Guid habitId, Guid userId, Guid? memberId)
         {
             var habit = await GetHabitWithTeamAsync(habitId, userId, requireCreator: false);
+            var isCreator = habit.Team.CreatorId == userId;
+
+
+            if (isCreator && memberId == null)
+            {
+                var allEntries = await _context.HabitEntries
+                    .Include(e => e.Habit)
+                    .Include(e => e.User)
+                    .Where(e => e.HabitId == habitId)
+                    .OrderBy(e => e.Date)
+                    .ToListAsync();
+                return allEntries.Select(e => MapToEntryResponse(e)).ToList();
+            }
+
             var targetUserId = memberId ?? userId;
 
             if (targetUserId != userId)
             {
-                var team = habit.Team;
-                if (team.CreatorId != userId)
+                if (!isCreator)
                     throw new ForbiddenException("You can only view your own progress unless you are team creator");
             }
 
             var entries = await _context.HabitEntries
+                .Include(e => e.Habit)
+                .Include(e => e.User)
                 .Where(e => e.HabitId == habitId && e.UserId == targetUserId)
                 .OrderBy(e => e.Date)
-                .Select(e => MapToEntryResponse(e))
                 .ToListAsync();
-            return entries;
+            return entries.Select(e => MapToEntryResponse(e)).ToList();
         }
 
         public async Task<List<LeaderboardEntryDto>> GetLeaderboardAsync(Guid habitId, Guid userId)
@@ -190,16 +204,20 @@ namespace HabitHub.API.Services
                 .Where(e => e.HabitId == habitId && members.Contains(e.UserId) && e.Status == EntryStatus.Logged)
                 .ToListAsync();
 
+            var userNames = await _context.Users
+                .Where(u => members.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.Name);
+
             var leaderboard = members.Select(memberId =>
             {
                 var memberEntries = entries.Where(e => e.UserId == memberId);
                 double? progress = habit.Type == HabitType.Binary
-                    ? memberEntries.Count() // number of logged days
-                    : memberEntries.Sum(e => e.Value); // sum of values
+                    ? memberEntries.Count()
+                    : memberEntries.Sum(e => e.Value);
                 return new LeaderboardEntryDto
                 {
                     UserId = memberId,
-                    UserName = _context.Users.Find(memberId)?.Name ?? "Unknown",
+                    UserName = userNames.GetValueOrDefault(memberId) ?? "Unknown",
                     Progress = (float?)progress
                 };
             }).OrderByDescending(l => l.Progress).ToList();

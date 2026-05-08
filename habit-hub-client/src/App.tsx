@@ -17,8 +17,9 @@ import { TeamsPanel } from './features/dashboards/teams/TeamsPanel';
 import { JoinTeams } from './features/dashboards/teams/JoinTeams';
 import { CreateTeam } from './features/dashboards/teams/CreateTeam';
 import { HabitsList } from './features/dashboards/teams/HabitsList';
+import { HabitLogs } from './features/dashboards/teams/HabitLogs';
 import { CreateHabit } from './features/dashboards/teams/CreateHabit';
-import { ChatPanel } from './features/dashboards/teams/ChatPanel';
+import { MembersList } from './features/dashboards/teams/MembersList';
 
 function App() {
   const initWelcome = useNotificationStore((state) => state.initWelcome);
@@ -72,8 +73,13 @@ function App() {
           element={<CreateHabit />}
         />
         <Route
-          path="teams-creator/chat/:teamId"
-          element={<ChatPanel />}
+          path="teams-creator/habits-creator/:teamId/logs/:habitId"
+          element={<HabitLogs />}
+        />
+        <Route path="teams-creator/chat/:teamId" element={<TeamsPanel />} />
+        <Route
+          path="teams-creator/teams/:teamId/members"
+          element={<MembersList />}
         />
       </Route>
 
@@ -98,9 +104,14 @@ function App() {
           element={<HabitsList />}
         />
         <Route
-          path="teams-member/chat/:teamId"
-          element={<ChatPanel />}
+          path="teams-member/habits-member/:teamId/logs/:habitId"
+          element={<HabitLogs />}
         />
+        <Route
+          path="teams-member/teams/:teamId/members"
+          element={<MembersList />}
+        />
+        <Route path="teams-member/chat/:teamId" element={<TeamsPanel />} />
       </Route>
     </Routes>
   );

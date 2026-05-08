@@ -465,15 +465,16 @@ namespace HabitHub.API.Services
                 throw new ForbiddenException("Access denied");
             }
 
-            var query = _context.Habits.Where(h => h.TeamId == teamId);
+            var query = _context.Habits
+                .Include(h => h.Team)
+                .Where(h => h.TeamId == teamId);
             if (!string.IsNullOrEmpty(state) && Enum.TryParse<HabitState>(state, true, out var habitState))
             {
                 query = query.Where(h => h.State == habitState);
             }
-                
 
-            var habits = await query.Select(h => MapToHabitResponse(h)).ToListAsync();
-            return habits;
+            var habits = await query.ToListAsync();
+            return habits.Select(h => MapToHabitResponse(h)).ToList();
         }
 
 

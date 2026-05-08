@@ -1,24 +1,60 @@
-import { useState } from 'react';
-import { Clock, Plus, Trash2, Calendar } from 'lucide-react';
-
-interface Reminder {
-  id: string;
-  task: string;
-  time: string;
-}
-
-const MOCK_REMINDERS: Reminder[] = [
-  { id: '1', task: 'Review team performance report', time: 'Today, 14:00' },
-  { id: '2', task: 'Drink a glass of water', time: 'Every day, 10:00' },
-  { id: '3', task: 'Update billing information', time: 'Tomorrow, 09:00' },
-];
+import { useEffect, useState } from 'react';
+import { Clock, Users, Calendar, AlertCircle } from 'lucide-react';
+import {
+  getUserReminders,
+  type ReminderResponseDto,
+} from '../../../api/teamsApi';
 
 export const Reminders = () => {
-  const [reminders, setReminders] = useState(MOCK_REMINDERS);
+  const [reminders, setReminders] = useState<ReminderResponseDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const deleteReminder = (id: string) => {
-    setReminders(reminders.filter((r) => r.id !== id));
+  const loadReminders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getUserReminders();
+      // Filter out disabled reminders if you only want to see active ones
+      setReminders(data.filter((r) => r.enabled));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load reminders');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    void loadReminders();
+  }, []);
+
+  const handleLogHabit = (habitId: string) => {
+    // TODO: Implement logging functionality
+    console.log(`Logging habit: ${habitId}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 items-center justify-center">
+        <p className="text-gray-500 font-medium">Loading reminders...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 items-center justify-center">
+        <AlertCircle className="text-red-500 mb-3" size={40} />
+        <p className="text-red-600 font-medium mb-4">{error}</p>
+        <button
+          onClick={() => void loadReminders()}
+          className="px-4 py-2 bg-black text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100">
@@ -31,42 +67,53 @@ export const Reminders = () => {
             Never miss an important habit or task.
           </p>
         </div>
-
-        <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm font-semibold transition-all">
-          <Plus size={18} />
-          Add Reminder
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto pr-2">
         {reminders.length === 0 ? (
-          <div className="col-span-full text-center py-10">
+          <div className="col-span-full text-center py-16 bg-gray-50 rounded-2xl border border-gray-100">
             <Calendar className="mx-auto text-gray-300 mb-3" size={48} />
-            <p className="text-gray-500">No active reminders.</p>
+            <p className="text-gray-500 font-medium">No active reminders.</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Set reminders in your team habits list.
+            </p>
           </div>
         ) : (
           reminders.map((reminder) => (
             <div
-              key={reminder.id}
-              className="flex flex-col justify-between p-6 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 transition-colors group"
+              key={reminder.habitId}
+              className="flex flex-col justify-between p-6 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all group"
             >
               <div>
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
+                {/* Top Row: Time & Team Name */}
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
                     <Clock size={14} />
-                    {reminder.time}
+                    {reminder.reminderTime}
                   </div>
-                  <button
-                    onClick={() => deleteReminder(reminder.id)}
-                    className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                    title="Delete reminder"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+
+                  {reminder.teamName && (
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-100">
+                      <Users size={12} />
+                      {reminder.teamName}
+                    </div>
+                  )}
                 </div>
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight">
-                  {reminder.task}
+
+                {/* Habit Name */}
+                <h3 className="font-bold text-gray-900 text-xl leading-tight mb-6">
+                  {reminder.habitName}
                 </h3>
+              </div>
+
+              {/* Bottom Row: Actions */}
+              <div className="flex justify-end mt-auto pt-4 border-t border-gray-50">
+                <button
+                  onClick={() => handleLogHabit(reminder.habitId)}
+                  className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-sm"
+                >
+                  Log Habit
+                </button>
               </div>
             </div>
           ))

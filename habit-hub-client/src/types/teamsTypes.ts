@@ -80,3 +80,15 @@ export interface TeamHabitInfo { //added please
   state: string; //added please
   teamId: string; //added please
 } //added please
+
+export interface HabitEntryResponseDto {
+  id: string;
+  habitId: string;
+  habitName: string | null;
+  userId: string;
+  userName: string | null;
+  date: string;
+  value: number | null;
+  status: string;
+  notes: string | null;
+}

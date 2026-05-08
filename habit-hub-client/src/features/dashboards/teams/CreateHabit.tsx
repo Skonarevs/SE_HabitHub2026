@@ -9,7 +9,9 @@ export const CreateHabit = () => {
 
   const [name, setName] = useState('');
   const [goal, setGoal] = useState('');
-  const [habitType, setHabitType] = useState<'Binary' | 'Quantitative'>('Binary');
+  const [habitType, setHabitType] = useState<'Binary' | 'Quantitative'>(
+    'Binary'
+  );
   const [unit, setUnit] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,9 @@ export const CreateHabit = () => {
         goal: goal.trim(),
         habitType,
         unit: habitType === 'Quantitative' ? unit.trim() : '',
-        expiryDate: expiryDate ? new Date(`${expiryDate}T23:59:59.999Z`).toISOString() : undefined,
+        expiryDate: expiryDate
+          ? new Date(`${expiryDate}T23:59:59.999Z`).toISOString()
+          : undefined,
       };
 
       await createTeamHabit(teamId, dto);
@@ -58,7 +62,10 @@ export const CreateHabit = () => {
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Create a Habit</h2>
-        <Link to={habitsPath} className="text-sm text-blue-600 hover:underline">
+        <Link
+          to={habitsPath}
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 hover:text-black transition-colors mb-2"
+        >
           ← Back
         </Link>
       </div>
@@ -69,33 +76,41 @@ export const CreateHabit = () => {
 
       <div className="space-y-5 max-w-2xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Habit Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Habit Name
+          </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             type="text"
             placeholder="Enter habit name"
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Goal</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Goal
+          </label>
           <input
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
             type="text"
             placeholder="Describe the goal"
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Habit Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Habit Type
+          </label>
           <select
             value={habitType}
-            onChange={(e) => setHabitType(e.target.value as 'Binary' | 'Quantitative')}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) =>
+              setHabitType(e.target.value as 'Binary' | 'Quantitative')
+            }
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
           >
             <option value="Binary">Binary</option>
             <option value="Quantitative">Quantitative</option>
@@ -104,24 +119,28 @@ export const CreateHabit = () => {
 
         {habitType === 'Quantitative' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Unit
+            </label>
             <input
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               type="text"
               placeholder="e.g. glasses, km, minutes"
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Expiry Date
+          </label>
           <input
             value={expiryDate}
             onChange={(e) => setExpiryDate(e.target.value)}
             type="date"
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
