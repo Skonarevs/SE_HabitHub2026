@@ -11,12 +11,21 @@ using Xunit;
 
 namespace HabitHub.UnitTests
 {
+    public class FakeEmailSender : HabitHub.API.Services.IEmailSender
+    {
+        public Task SendEmailAsync(string toEmail, string toName, string subject, string message)
+        {
+            return Task.CompletedTask;
+        }
+    }
+
     public class AuthServiceTests
     {
         private AuthService GetService(AppDbContext context)
         {
             var passwordHasher = new PasswordHasher<User>();
-            return new AuthService(context, passwordHasher);
+            var emailSender = new FakeEmailSender();
+            return new AuthService(context, passwordHasher, emailSender);
         }
 
 
