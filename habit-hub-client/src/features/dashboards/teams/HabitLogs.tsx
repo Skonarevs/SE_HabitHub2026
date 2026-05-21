@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { getHabitEntries, logProgress } from '../../../api/teamsApi';
+// ✅ IMPORT undoLog here!
+import { getHabitEntries, logProgress, undoLog } from '../../../api/teamsApi';
 import type { HabitEntryResponseDto } from '../../../types/teamsTypes';
 
 interface LocationState {
@@ -21,7 +22,6 @@ export const HabitLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Log form state
   const [logValue, setLogValue] = useState('');
   const [logNotes, setLogNotes] = useState('');
   const [logLoading, setLogLoading] = useState(false);
@@ -32,9 +32,7 @@ export const HabitLogs = () => {
     : `/main-member/teams-member/habits-member/${teamId}`;
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const loggedToday = entries.some(
-    (e) => e.date.slice(0, 10) === todayStr
-  );
+  const loggedToday = entries.some((e) => e.date.slice(0, 10) === todayStr);
 
   const loadEntries = async () => {
     if (!habitId) {
@@ -69,16 +67,34 @@ export const HabitLogs = () => {
       setLogError(null);
       await logProgress(habitId, {
         status,
-        value: isQuantitative && status === 'Logged' ? parseFloat(logValue) : undefined,
-        notes: logNotes.trim() || undefined,
+        value:
+          isQuantitative && status === 'Logged'
+            ? parseFloat(logValue)
+            : undefined,
+
+        notes: logNotes.trim() || '',
       });
       setLogValue('');
       setLogNotes('');
       await loadEntries();
     } catch (err) {
-      setLogError(err instanceof Error ? err.message : 'Failed to log progress.');
+      setLogError(
+        err instanceof Error ? err.message : 'Failed to log progress.'
+      );
     } finally {
       setLogLoading(false);
+    }
+  };
+
+  const handleUndo = async (entryId: string) => {
+    if (!habitId) return;
+    if (!window.confirm('Are you sure you want to undo this log?')) return;
+
+    try {
+      await undoLog(habitId, entryId);
+      await loadEntries();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to undo log.');
     }
   };
 
@@ -103,7 +119,6 @@ export const HabitLogs = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden">
-      {/* Header */}
       <div className="mb-6">
         <Link
           to={backPath}
@@ -119,7 +134,6 @@ export const HabitLogs = () => {
         </p>
       </div>
 
-      {/* Log Today — members only */}
       {!isCreator && (
         <div className="mb-8 border border-gray-200 rounded-2xl p-5 bg-gray-50">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">
@@ -134,7 +148,9 @@ export const HabitLogs = () => {
             <div className="flex flex-col gap-3">
               {isQuantitative && (
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-gray-600 w-14 shrink-0">Value</label>
+                  <label className="text-sm text-gray-600 w-14 shrink-0">
+                    Value
+                  </label>
                   <input
                     type="number"
                     value={logValue}
@@ -145,7 +161,9 @@ export const HabitLogs = () => {
                 </div>
               )}
               <div className="flex items-center gap-3">
-                <label className="text-sm text-gray-600 w-14 shrink-0">Notes</label>
+                <label className="text-sm text-gray-600 w-14 shrink-0">
+                  Notes
+                </label>
                 <input
                   type="text"
                   value={logNotes}
@@ -155,9 +173,7 @@ export const HabitLogs = () => {
                 />
               </div>
 
-              {logError && (
-                <p className="text-sm text-red-600">{logError}</p>
-              )}
+              {logError && <p className="text-sm text-red-600">{logError}</p>}
 
               <div className="flex gap-3 mt-1">
                 <button
@@ -180,7 +196,6 @@ export const HabitLogs = () => {
         </div>
       )}
 
-      {/* Entries Table */}
       <div className="overflow-x-auto">
         {entries.length === 0 ? (
           <div className="text-center py-12 text-gray-400 italic">
@@ -195,6 +210,9 @@ export const HabitLogs = () => {
                 <th className="px-4 py-2 font-medium">Status</th>
                 <th className="px-4 py-2 font-medium">Value</th>
                 <th className="px-4 py-2 font-medium">Notes</th>
+                {!isCreator && (
+                  <th className="px-4 py-2 font-medium text-right">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -229,11 +247,25 @@ export const HabitLogs = () => {
                       {entry.value != null ? entry.value : '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-4 rounded-r-2xl border-y border-r border-transparent group-hover:border-gray-200">
+
+                  <td
+                    className={`px-4 py-4 border-y border-transparent group-hover:border-gray-200 ${isCreator ? 'rounded-r-2xl border-r' : ''}`}
+                  >
                     <span className="text-gray-500 text-sm">
-                      {entry.notes ?? '—'}
+                      {entry.notes || '—'}
                     </span>
                   </td>
+
+                  {!isCreator && (
+                    <td className="px-4 py-4 rounded-r-2xl border-y border-r border-transparent group-hover:border-gray-200 text-right">
+                      <button
+                        onClick={() => handleUndo(entry.id)}
+                        className="text-sm text-red-500 hover:text-red-700 font-medium px-2 py-1 transition-colors bg-red-50 hover:bg-red-100 rounded-lg"
+                      >
+                        Undo
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

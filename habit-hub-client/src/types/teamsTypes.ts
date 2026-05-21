@@ -32,7 +32,8 @@ export interface MembershipResponseDto {
   status: string;
 }
 
-export interface CreateHabitDto { //added please
+export interface CreateHabitDto {
+  //added please
   name: string; //added please
   goal: string; //added please
   habitType: 'Binary' | 'Quantitative'; //added please
@@ -48,7 +49,8 @@ export interface UpdateHabitDto {
   expiryDate?: string;
 }
 
-export interface HabitResponseDto { //added please
+export interface HabitResponseDto {
+  //added please
   id: string; //added please
   name: string; //added please
   goal: string; //added please
@@ -70,7 +72,8 @@ export interface ArchivedHabitResponseDto {
   archivedAt?: string | null;
 }
 
-export interface TeamHabitInfo { //added please
+export interface TeamHabitInfo {
+  //added please
   id: string; //added please
   name: string; //added please
   goal: string; //added please
@@ -91,4 +94,12 @@ export interface HabitEntryResponseDto {
   value: number | null;
   status: string;
   notes: string | null;
+}
+
+export interface HabitLeaderboardEntry {
+  userId: string;
+  userName: string;
+  score: number;
+  rank: number;
+  isCurrentUser: boolean;
 }

@@ -23,7 +23,6 @@ export const HabitsList = () => {
   const [error, setError] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Edit Habit States
   const [editingHabit, setEditingHabit] = useState<TeamHabitInfo | null>(null);
   const [editName, setEditName] = useState('');
   const [editGoal, setEditGoal] = useState('');
@@ -33,7 +32,6 @@ export const HabitsList = () => {
   const [editError, setEditError] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
 
-  // Reminder States
   const [reminderTimes, setReminderTimes] = useState<Record<string, string>>(
     {}
   );
@@ -82,6 +80,15 @@ export const HabitsList = () => {
     }
   };
 
+  const handleLeaderboard = (id: string) => {
+    navigate(
+      isCreator
+        ? `/main-creator/teams-creator/${id}/leaderboard`
+        : `/main-member/teams-member/${id}/leaderboard`,
+      { state: { habitId: id } }
+    );
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this habit?')) return;
     try {
@@ -92,7 +99,6 @@ export const HabitsList = () => {
     }
   };
 
-  // --- Reminder Handlers ---
   const startEditingReminder = (habitId: string) => {
     setEditingReminderId(habitId);
     setTempReminderTime(reminderTimes[habitId] || '');
@@ -101,17 +107,14 @@ export const HabitsList = () => {
   const saveReminder = async (habitId: string) => {
     if (tempReminderTime) {
       try {
-        // 1. Send it to the C# backend!
         await setHabitReminder(habitId, tempReminderTime);
 
-        // 2. If it succeeds, update the UI
         setReminderTimes((prev) => ({ ...prev, [habitId]: tempReminderTime }));
         setEditingReminderId(null);
       } catch (err) {
         alert('Failed to save the reminder to the server.');
       }
     } else {
-      // (Optional logic if you want to allow them to DELETE a reminder by clearing the time)
       const newTimes = { ...reminderTimes };
       delete newTimes[habitId];
       setReminderTimes(newTimes);
@@ -119,23 +122,19 @@ export const HabitsList = () => {
     }
   };
 
-  // 2. Update toggleDisableReminder
   const toggleDisableReminder = async (habitId: string) => {
     const currentlyDisabled = disabledReminders[habitId] || false;
-    const isNowEnabled = currentlyDisabled; // If it was disabled, we are turning it ON (Enabled = true)
+    const isNowEnabled = currentlyDisabled;
 
     try {
-      // 1. Send the new 'Enabled' status to the backend
       await toggleHabitReminder(habitId, isNowEnabled);
 
-      // 2. If it succeeds, update the UI
       setDisabledReminders((prev) => ({ ...prev, [habitId]: !isNowEnabled }));
     } catch (err) {
       alert('Failed to update reminder status.');
     }
   };
 
-  // --- Edit Handlers ---
   const startEdit = (habit: TeamHabitInfo) => {
     setEditingHabit(habit);
     setEditName(habit.name);
@@ -223,7 +222,6 @@ export const HabitsList = () => {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-3xl p-8 shadow-sm w-full border border-gray-100 overflow-hidden">
-      {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="flex flex-col items-start">
           <Link
@@ -268,9 +266,7 @@ export const HabitsList = () => {
         </div>
       </div>
 
-      {/* Table & Edit Form Area */}
       <div className="overflow-x-auto">
-        {/* EDIT HABIT FORM */}
         {editingHabit && (
           <div className="mb-6 border border-gray-200 rounded-2xl p-4 bg-gray-50">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -432,12 +428,9 @@ export const HabitsList = () => {
                   </td>
                 )}
 
-                {/* --- REMINDER COLUMN --- */}
                 <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
                   {isCreator ? (
-                    // CREATOR VIEW
                     editingReminderId === habit.id ? (
-                      // 1. Inline edit mode for Creator
                       <div className="flex items-center justify-end gap-2">
                         <input
                           type="time"
@@ -459,7 +452,6 @@ export const HabitsList = () => {
                         </button>
                       </div>
                     ) : reminderTimes[habit.id] ? (
-                      // 2. Reminder is set, show button to edit
                       <button
                         className="text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors border border-blue-100"
                         onClick={() => startEditingReminder(habit.id)}
@@ -467,7 +459,6 @@ export const HabitsList = () => {
                         {reminderTimes[habit.id]}
                       </button>
                     ) : (
-                      // 3. No reminder set, show "Set Reminder" link
                       <button
                         className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors"
                         onClick={() => startEditingReminder(habit.id)}
@@ -476,11 +467,9 @@ export const HabitsList = () => {
                       </button>
                     )
                   ) : (
-                    // MEMBER VIEW
                     <div className="flex items-center justify-end gap-3">
                       {reminderTimes[habit.id] ? (
                         <>
-                          {/* Member sees time (crossed out if disabled) */}
                           <span
                             className={`text-sm font-semibold transition-all ${
                               disabledReminders[habit.id]
@@ -488,9 +477,9 @@ export const HabitsList = () => {
                                 : 'text-gray-700'
                             }`}
                           >
-                            ⏰ {reminderTimes[habit.id]}
+                            {reminderTimes[habit.id]}
                           </span>
-                          {/* Member Disable/Enable Toggle */}
+
                           <button
                             onClick={() => toggleDisableReminder(habit.id)}
                             className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border ${
@@ -510,7 +499,10 @@ export const HabitsList = () => {
                 </td>
 
                 <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
-                  <button className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors">
+                  <button
+                    onClick={() => void handleLeaderboard(habit.id)}
+                    className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors"
+                  >
                     View Leaderboard
                   </button>
                 </td>
@@ -536,7 +528,12 @@ export const HabitsList = () => {
                         onClick={() =>
                           navigate(
                             `/main-creator/teams-creator/habits-creator/${teamId}/logs/${habit.id}`,
-                            { state: { habitType: habit.habitType, habitName: habit.name } }
+                            {
+                              state: {
+                                habitType: habit.habitType,
+                                habitName: habit.name,
+                              },
+                            }
                           )
                         }
                         className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
@@ -556,7 +553,12 @@ export const HabitsList = () => {
                         onClick={() =>
                           navigate(
                             `/main-member/teams-member/habits-member/${teamId}/logs/${habit.id}`,
-                            { state: { habitType: habit.habitType, habitName: habit.name } }
+                            {
+                              state: {
+                                habitType: habit.habitType,
+                                habitName: habit.name,
+                              },
+                            }
                           )
                         }
                         className="text-pink-400 bg-pink-50 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border border-pink-100"

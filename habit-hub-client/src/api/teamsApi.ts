@@ -7,6 +7,7 @@ import type {
   TeamInfo, //added please
   TeamResponseDto, //added please
   UpdateHabitDto,
+  HabitLeaderboardEntry,
 } from '../types/teamsTypes'; //added please
 import api from './axiosInstance';
 import axios from 'axios';
@@ -238,6 +239,36 @@ export const getArchivedHabits = async (
   }
 };
 
+export const getHabitLeaderboard = async (
+  habitId: string
+): Promise<HabitLeaderboardEntry[]> => {
+  try {
+    const response = await api.get(`/habits/${habitId}/leaderboard`);
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to load leaderboard (HTTP ${status}).`
+            : 'Failed to load leaderboard. Please check your connection.')
+      );
+    }
+    return [];
+  }
+};
 export const createTeamHabit = async (
   //added please
   teamId: string, //added please
@@ -410,7 +441,9 @@ export interface TeamMemberResponseDto {
   status: string;
 }
 
-export const getTeamMembers = async (teamId: string): Promise<TeamMemberResponseDto[]> => {
+export const getTeamMembers = async (
+  teamId: string
+): Promise<TeamMemberResponseDto[]> => {
   try {
     const response = await api.get<TeamMemberResponseDto[]>(
       `/teams/${teamId}/members`
@@ -489,7 +522,9 @@ export const logProgress = async (
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
       throw new Error(
@@ -520,7 +555,9 @@ export const getHabitEntries = async (
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
       throw new Error(
@@ -531,5 +568,64 @@ export const getHabitEntries = async (
       );
     }
     throw new Error('Unexpected error while loading habit entries.');
+  }
+};
+
+export const getAllMemberHabits = async (
+  teamId: string
+): Promise<TeamHabitInfo[]> => {
+  try {
+    const response = await api.get<TeamHabitInfo[]>(`/teams/${teamId}/habits`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to load member habits (HTTP ${status}).`
+            : 'Failed to load member habits. Please check your connection.')
+      );
+    }
+    throw new Error('Unexpected error while loading member habits.');
+  }
+};
+
+export const undoLog = async (
+  habitId: string,
+  entryId: string
+): Promise<void> => {
+  try {
+    await api.delete(`/habits/${habitId}/entries/${entryId}`);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to undo log (HTTP ${status}).`
+            : 'Failed to undo log. Please check your connection.')
+      );
+    }
+    throw new Error('Unexpected error while undoing log.');
   }
 };

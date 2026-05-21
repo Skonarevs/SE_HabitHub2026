@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Clock, Users, Calendar, AlertCircle } from 'lucide-react';
 import {
   getUserReminders,
+  logProgress,
   type ReminderResponseDto,
 } from '../../../api/teamsApi';
 
@@ -9,13 +10,14 @@ export const Reminders = () => {
   const [reminders, setReminders] = useState<ReminderResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loggingId, setLoggingId] = useState<string | null>(null);
 
   const loadReminders = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await getUserReminders();
-      // Filter out disabled reminders if you only want to see active ones
+
       setReminders(data.filter((r) => r.enabled));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load reminders');
@@ -28,9 +30,23 @@ export const Reminders = () => {
     void loadReminders();
   }, []);
 
-  const handleLogHabit = (habitId: string) => {
-    // TODO: Implement logging functionality
-    console.log(`Logging habit: ${habitId}`);
+  const handleLogHabit = async (habitId: string, habitName: string) => {
+    try {
+      setLoggingId(habitId);
+
+      await logProgress(habitId, {
+        status: 'Logged',
+        notes: '',
+      });
+
+      setReminders((prev) => prev.filter((r) => r.habitId !== habitId));
+
+      alert(`🎉 Logged progress for ${habitName}!`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to log habit.');
+    } finally {
+      setLoggingId(null);
+    }
   };
 
   if (loading) {
@@ -85,7 +101,6 @@ export const Reminders = () => {
               className="flex flex-col justify-between p-6 rounded-2xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all group"
             >
               <div>
-                {/* Top Row: Time & Team Name */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
                     <Clock size={14} />
@@ -100,19 +115,24 @@ export const Reminders = () => {
                   )}
                 </div>
 
-                {/* Habit Name */}
                 <h3 className="font-bold text-gray-900 text-xl leading-tight mb-6">
                   {reminder.habitName}
                 </h3>
               </div>
 
-              {/* Bottom Row: Actions */}
               <div className="flex justify-end mt-auto pt-4 border-t border-gray-50">
                 <button
-                  onClick={() => handleLogHabit(reminder.habitId)}
-                  className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-sm"
+                  onClick={() =>
+                    handleLogHabit(reminder.habitId, reminder.habitName)
+                  }
+                  disabled={loggingId === reminder.habitId}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm ${
+                    loggingId === reminder.habitId
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-black hover:bg-gray-800 text-white hover:-translate-y-0.5'
+                  }`}
                 >
-                  Log Habit
+                  {loggingId === reminder.habitId ? 'Saving...' : 'Log Habit'}
                 </button>
               </div>
             </div>
