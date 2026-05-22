@@ -168,6 +168,32 @@ namespace HabitHub.API.Services
         }
 
 
+        public async Task<List<UserReminderDto>> GetUserRemindersAsync(Guid userId)
+        {
+            // Left join: all active habits from teams where user is active member or creator, with optional reminder record for that user.
+            var reminders = await (from habit in _context.Habits
+                                   join team in _context.Teams on habit.TeamId equals team.Id
+                                   join reminder in _context.Reminders
+                                       on new { HabitId = habit.Id, UserId = userId }
+                                       equals new { reminder.HabitId, reminder.UserId }
+                                       into reminderJoin
+                                   from reminder in reminderJoin.DefaultIfEmpty()
+                                   where habit.State == HabitState.Active
+                                         && (team.CreatorId == userId
+                                             || _context.Memberships.Any(m => m.TeamId == team.Id && m.UserId == userId && m.Status == MembershipStatus.Active))
+                                   select new UserReminderDto
+                                   {
+                                       HabitId = habit.Id,
+                                       HabitName = habit.Name,
+                                       TeamId = team.Id,
+                                       TeamName = team.Name,
+                                       DefaultReminderTime = habit.DefaultReminderTime,
+                                       Enabled = reminder != null ? reminder.Enabled : true  
+                                   }).ToListAsync();
+
+            return reminders;
+        }
+
 
     }
 }

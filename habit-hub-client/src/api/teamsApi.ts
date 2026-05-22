@@ -7,6 +7,7 @@ import type {
   TeamInfo, //added please
   TeamResponseDto, //added please
   UpdateHabitDto,
+  HabitLeaderboardEntry,
 } from '../types/teamsTypes'; //added please
 import api from './axiosInstance';
 import axios from 'axios';
@@ -25,16 +26,16 @@ const getTeamDetails = async (teamId: string): Promise<TeamResponseDto> => {
 };
 
 const mapHabitDto = (dto: HabitResponseDto): TeamHabitInfo => ({
-  //added please
-  id: dto.id, //added please
-  name: dto.name, //added please
-  goal: dto.goal, //added please
-  habitType: dto.habitType, //added please
-  unit: dto.unit ?? undefined, //added please
-  expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined, //added please
-  state: dto.state, //added please
-  teamId: dto.teamId, //added please
-}); //added please
+  id: dto.id,
+  name: dto.name,
+  goal: dto.goal,
+  habitType: dto.habitType,
+  unit: dto.unit ?? undefined,
+  expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
+  state: dto.state,
+  teamId: dto.teamId,
+  reminderTime: dto.reminderTime,
+});
 
 const mapArchivedHabitDto = (
   dto: ArchivedHabitResponseDto,
@@ -48,19 +49,19 @@ const mapArchivedHabitDto = (
   expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
   state: 'Archived',
   teamId,
+  reminderTime: dto.reminderTime,
 });
-// Add this interface to your types file or at the top of your API file
+
 export interface ReminderResponseDto {
   habitId: string;
   habitName: string;
   enabled: boolean;
   reminderTime: string;
-  teamName?: string; // Optional in case some habits are personal
+  teamName?: string;
 }
 
 export const getUserReminders = async (): Promise<ReminderResponseDto[]> => {
   try {
-    // Replace '/reminders' with your actual C# controller route for getting user reminders
     const response = await api.get<ReminderResponseDto[]>('/reminders');
     return response.data;
   } catch (error) {
@@ -238,6 +239,36 @@ export const getArchivedHabits = async (
   }
 };
 
+export const getHabitLeaderboard = async (
+  habitId: string
+): Promise<HabitLeaderboardEntry[]> => {
+  try {
+    const response = await api.get(`/habits/${habitId}/leaderboard`);
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to load leaderboard (HTTP ${status}).`
+            : 'Failed to load leaderboard. Please check your connection.')
+      );
+    }
+    return [];
+  }
+};
 export const createTeamHabit = async (
   //added please
   teamId: string, //added please
@@ -410,7 +441,9 @@ export interface TeamMemberResponseDto {
   status: string;
 }
 
-export const getTeamMembers = async (teamId: string): Promise<TeamMemberResponseDto[]> => {
+export const getTeamMembers = async (
+  teamId: string
+): Promise<TeamMemberResponseDto[]> => {
   try {
     const response = await api.get<TeamMemberResponseDto[]>(
       `/teams/${teamId}/members`
@@ -489,7 +522,9 @@ export const logProgress = async (
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
       throw new Error(
@@ -520,7 +555,9 @@ export const getHabitEntries = async (
       const serverMessage =
         typeof serverData === 'string'
           ? serverData
-          : serverData && typeof serverData === 'object' && 'error' in serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
             ? String(serverData.error)
             : null;
       throw new Error(
@@ -531,5 +568,67 @@ export const getHabitEntries = async (
       );
     }
     throw new Error('Unexpected error while loading habit entries.');
+  }
+};
+
+export const getAllMemberHabits = async (
+  teamId: string
+): Promise<TeamHabitInfo[]> => {
+  try {
+    const response = await api.get<HabitResponseDto[]>(
+      `/teams/${teamId}/habits`
+    );
+
+    return response.data.map(mapHabitDto);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to load member habits (HTTP ${status}).`
+            : 'Failed to load member habits. Please check your connection.')
+      );
+    }
+    throw new Error('Unexpected error while loading member habits.');
+  }
+};
+
+export const undoLog = async (
+  habitId: string,
+  entryId: string
+): Promise<void> => {
+  try {
+    await api.delete(`/habits/${habitId}/entries/${entryId}`);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const serverData = error.response?.data;
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData &&
+              typeof serverData === 'object' &&
+              'error' in serverData
+            ? String(serverData.error)
+            : null;
+
+      throw new Error(
+        serverMessage ||
+          (status
+            ? `Failed to undo log (HTTP ${status}).`
+            : 'Failed to undo log. Please check your connection.')
+      );
+    }
+    throw new Error('Unexpected error while undoing log.');
   }
 };

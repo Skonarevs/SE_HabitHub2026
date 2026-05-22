@@ -236,7 +236,8 @@ namespace HabitHub.API.Services
                 ExpiryDate = habit.ExpiryDate,
                 State = habit.State.ToString(),
                 TeamId = habit.TeamId,
-                TeamName = habit.Team?.Name
+                TeamName = habit.Team?.Name,
+                ReminderTime = habit.DefaultReminderTime?.ToString("HH:mm:ss")
             };
         }
 
@@ -254,6 +255,23 @@ namespace HabitHub.API.Services
                 Status = entry.Status.ToString(),
                 Notes = entry.Notes
             };
+        }
+
+        public async Task<List<HabitResponseDto>> GetUserHabitsAsync(Guid userId)
+        {
+            var teamIds = await _context.Memberships
+                .Where(m => m.UserId == userId && m.Status == MembershipStatus.Active)
+                .Select(m => m.TeamId)
+                .Union(_context.Teams.Where(t => t.CreatorId == userId).Select(t => t.Id))
+                .Distinct()
+                .ToListAsync();
+
+            var habits = await _context.Habits
+                .Where(h => teamIds.Contains(h.TeamId) && h.State == HabitState.Active)
+                .Select(h => MapToHabitResponse(h))
+                .ToListAsync();
+
+            return habits;
         }
     }
 }

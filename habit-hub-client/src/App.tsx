@@ -20,6 +20,8 @@ import { HabitsList } from './features/dashboards/teams/HabitsList';
 import { HabitLogs } from './features/dashboards/teams/HabitLogs';
 import { CreateHabit } from './features/dashboards/teams/CreateHabit';
 import { MembersList } from './features/dashboards/teams/MembersList';
+import { LeaderBoard } from './features/dashboards/teams/LeaderBoard';
+import { useHabitReminders } from './hooks/useHabitReminder';
 
 function App() {
   const initWelcome = useNotificationStore((state) => state.initWelcome);
@@ -27,7 +29,7 @@ function App() {
   useEffect(() => {
     initWelcome();
   }, [initWelcome]);
-
+  useHabitReminders();
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
@@ -81,6 +83,10 @@ function App() {
           path="teams-creator/teams/:teamId/members"
           element={<MembersList />}
         />
+        <Route
+          path="teams-creator/:habitId/leaderboard/"
+          element={<LeaderBoard />}
+        />
       </Route>
 
       <Route
@@ -110,6 +116,10 @@ function App() {
         <Route
           path="teams-member/teams/:teamId/members"
           element={<MembersList />}
+        />
+        <Route
+          path="teams-member/:habitId/leaderboard/"
+          element={<LeaderBoard />}
         />
         <Route path="teams-member/chat/:teamId" element={<TeamsPanel />} />
       </Route>

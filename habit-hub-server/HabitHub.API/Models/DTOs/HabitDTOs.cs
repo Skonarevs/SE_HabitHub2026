@@ -29,6 +29,7 @@
         public string State { get; set; } 
         public Guid TeamId { get; set; }
         public string TeamName { get; set; }
+        public string ReminderTime { get; set; }
     }
 
     public class LogProgressDto

@@ -308,21 +308,11 @@ namespace HabitHub.API.Services
                 throw new ForbiddenException("You are not a member of this team");
             }
 
-            return await _context.Habits
+            var habits = await _context.Habits
+                .Include(h => h.Team)
                 .Where(h => h.TeamId == teamId && h.State == HabitState.Active)
-                .Select(h => new HabitResponseDto
-                {
-                    Id = h.Id,
-                    Name = h.Name,
-                    Goal = h.Goal,
-                    HabitType = h.Type.ToString(),
-                    Unit = h.Unit,
-                    ExpiryDate = h.ExpiryDate,
-                    State = h.State.ToString(),
-                    TeamId = h.TeamId,
-                    TeamName = h.Team != null ? h.Team.Name : null
-                })
                 .ToListAsync();
+            return habits.Select(h => MapToHabitResponse(h)).ToList();
         }
 
         public async Task<List<ArchivedHabitDto>> GetArchivedHabitsAsync(Guid teamId, Guid userId)
@@ -369,7 +359,8 @@ namespace HabitHub.API.Services
                 ExpiryDate = habit.ExpiryDate,
                 State = habit.State.ToString(),
                 TeamId = habit.TeamId,
-                TeamName = habit.Team?.Name
+                TeamName = habit.Team?.Name,
+                ReminderTime = habit.DefaultReminderTime?.ToString("HH:mm:ss")
             };
         }
 

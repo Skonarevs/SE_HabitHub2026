@@ -75,5 +75,13 @@ namespace HabitHub.API.Controllers
             var leaderboard = await _habitService.GetLeaderboardAsync(habitId, userId);
             return Ok(leaderboard);
         }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMyHabits()
+        {
+            var userId = User.GetUserId();
+            var habits = await _habitService.GetUserHabitsAsync(userId);
+            return Ok(habits);
+        }
     }
 }
