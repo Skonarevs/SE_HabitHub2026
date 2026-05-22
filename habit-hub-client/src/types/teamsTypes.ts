@@ -60,6 +60,7 @@ export interface HabitResponseDto {
   state: string; //added please
   teamId: string; //added please
   teamName?: string | null; //added please
+  reminderTime?: string;
 } //added please
 
 export interface ArchivedHabitResponseDto {
@@ -70,6 +71,7 @@ export interface ArchivedHabitResponseDto {
   unit?: string | null;
   expiryDate?: string | null;
   archivedAt?: string | null;
+  reminderTime?: string;
 }
 
 export interface TeamHabitInfo {
@@ -82,6 +84,7 @@ export interface TeamHabitInfo {
   expiryDate?: Date; //added please
   state: string; //added please
   teamId: string; //added please
+  reminderTime?: string;
 } //added please
 
 export interface HabitEntryResponseDto {

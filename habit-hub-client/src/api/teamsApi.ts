@@ -26,16 +26,16 @@ const getTeamDetails = async (teamId: string): Promise<TeamResponseDto> => {
 };
 
 const mapHabitDto = (dto: HabitResponseDto): TeamHabitInfo => ({
-  //added please
-  id: dto.id, //added please
-  name: dto.name, //added please
-  goal: dto.goal, //added please
-  habitType: dto.habitType, //added please
-  unit: dto.unit ?? undefined, //added please
-  expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined, //added please
-  state: dto.state, //added please
-  teamId: dto.teamId, //added please
-}); //added please
+  id: dto.id,
+  name: dto.name,
+  goal: dto.goal,
+  habitType: dto.habitType,
+  unit: dto.unit ?? undefined,
+  expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
+  state: dto.state,
+  teamId: dto.teamId,
+  reminderTime: dto.reminderTime,
+});
 
 const mapArchivedHabitDto = (
   dto: ArchivedHabitResponseDto,
@@ -49,19 +49,19 @@ const mapArchivedHabitDto = (
   expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
   state: 'Archived',
   teamId,
+  reminderTime: dto.reminderTime,
 });
-// Add this interface to your types file or at the top of your API file
+
 export interface ReminderResponseDto {
   habitId: string;
   habitName: string;
   enabled: boolean;
   reminderTime: string;
-  teamName?: string; // Optional in case some habits are personal
+  teamName?: string;
 }
 
 export const getUserReminders = async (): Promise<ReminderResponseDto[]> => {
   try {
-    // Replace '/reminders' with your actual C# controller route for getting user reminders
     const response = await api.get<ReminderResponseDto[]>('/reminders');
     return response.data;
   } catch (error) {
@@ -575,8 +575,11 @@ export const getAllMemberHabits = async (
   teamId: string
 ): Promise<TeamHabitInfo[]> => {
   try {
-    const response = await api.get<TeamHabitInfo[]>(`/teams/${teamId}/habits`);
-    return response.data;
+    const response = await api.get<HabitResponseDto[]>(
+      `/teams/${teamId}/habits`
+    );
+
+    return response.data.map(mapHabitDto);
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;

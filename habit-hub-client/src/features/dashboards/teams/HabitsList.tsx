@@ -10,6 +10,7 @@ import {
   setHabitReminder,
   toggleHabitReminder,
 } from '../../../api/teamsApi';
+import { Clock } from 'lucide-react';
 import type { TeamHabitInfo } from '../../../types/teamsTypes';
 
 export const HabitsList = () => {
@@ -99,16 +100,16 @@ export const HabitsList = () => {
     }
   };
 
-  const startEditingReminder = (habitId: string) => {
+  const startEditingReminder = (habitId: string, currentSavedTime?: string) => {
     setEditingReminderId(habitId);
-    setTempReminderTime(reminderTimes[habitId] || '');
+    // Use the locally edited time, or fallback to the database time
+    setTempReminderTime(reminderTimes[habitId] || currentSavedTime || '');
   };
 
   const saveReminder = async (habitId: string) => {
     if (tempReminderTime) {
       try {
         await setHabitReminder(habitId, tempReminderTime);
-
         setReminderTimes((prev) => ({ ...prev, [habitId]: tempReminderTime }));
         setEditingReminderId(null);
       } catch (err) {
@@ -128,7 +129,6 @@ export const HabitsList = () => {
 
     try {
       await toggleHabitReminder(habitId, isNowEnabled);
-
       setDisabledReminders((prev) => ({ ...prev, [habitId]: !isNowEnabled }));
     } catch (err) {
       alert('Failed to update reminder status.');
@@ -284,7 +284,6 @@ export const HabitsList = () => {
                   type="text"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Goal
@@ -296,7 +295,6 @@ export const HabitsList = () => {
                   type="text"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Type
@@ -312,7 +310,6 @@ export const HabitsList = () => {
                   <option value="Quantitative">Quantitative</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Unit
@@ -325,7 +322,6 @@ export const HabitsList = () => {
                   disabled={editType !== 'Quantitative'}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Expiry Date
@@ -338,11 +334,9 @@ export const HabitsList = () => {
                 />
               </div>
             </div>
-
             {editError && (
               <p className="text-sm text-red-600 mt-3">{editError}</p>
             )}
-
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => void saveEdit()}
@@ -367,20 +361,12 @@ export const HabitsList = () => {
             <tr className="text-gray-400 text-sm uppercase tracking-wider">
               <th className="px-4 py-2 font-medium">Name</th>
               <th className="px-4 py-2 font-medium">Goal</th>
-
-              {isCreator ? (
-                <>
-                  <th className="px-4 py-2 font-medium">Type</th>
-                  <th className="px-4 py-2 font-medium">End Date</th>
-                </>
-              ) : (
-                <th className="px-4 py-2 font-medium">End Date</th>
-              )}
+              {isCreator && <th className="px-4 py-2 font-medium">Type</th>}
+              <th className="px-4 py-2 font-medium">End Date</th>
               <th className="px-4 py-2 font-medium text-right w-48">
                 Reminder
               </th>
               <th className="px-4 py-2 font-medium text-right">Leaderboard</th>
-
               <th className="px-4 py-2 font-medium text-right">
                 {isCreator ? 'Manage' : 'Progress'}
               </th>
@@ -388,37 +374,44 @@ export const HabitsList = () => {
           </thead>
 
           <tbody>
-            {habits.map((habit) => (
-              <tr
-                key={habit.id}
-                className="bg-gray-50 hover:bg-gray-100 transition-colors group"
-              >
-                <td className="px-4 py-4 rounded-l-2xl border-y border-l border-transparent group-hover:border-gray-200">
-                  <span className="font-semibold text-gray-700">
-                    {habit.name}
-                  </span>
-                </td>
+            {habits.map((habit) => {
+              // Combine local state and database state for the reminder time
+              const activeReminderTime =
+                reminderTimes[habit.id] ?? habit.reminderTime;
 
-                <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
-                  <span className="text-gray-600 text-sm">{habit.goal}</span>
-                </td>
+              return (
+                <tr
+                  key={habit.id}
+                  className="bg-gray-50 hover:bg-gray-100 transition-colors group"
+                >
+                  {/* ✅ FIXED: Name Column with Clock badge for everyone */}
+                  <td className="px-4 py-4 rounded-l-2xl border-y border-l border-transparent group-hover:border-gray-200">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-700">
+                        {habit.name}
+                      </span>
+                      {activeReminderTime && (
+                        <span className="flex items-center gap-1 text-xs font-bold text-blue-600 mt-1">
+                          <Clock size={12} />
+                          {activeReminderTime}
+                        </span>
+                      )}
+                    </div>
+                  </td>
 
-                {isCreator ? (
-                  <>
+                  <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
+                    <span className="text-gray-600 text-sm">{habit.goal}</span>
+                  </td>
+
+                  {isCreator && (
                     <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                         {habit.habitType}
                       </span>
                     </td>
-                    <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
-                      <span className="text-gray-500 text-sm">
-                        {habit.expiryDate
-                          ? habit.expiryDate.toLocaleDateString()
-                          : '-'}
-                      </span>
-                    </td>
-                  </>
-                ) : (
+                  )}
+
+                  {/* ✅ FIXED: Proper End Date column for both members and creators */}
                   <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                     <span className="text-gray-500 text-sm">
                       {habit.expiryDate
@@ -426,150 +419,155 @@ export const HabitsList = () => {
                         : '-'}
                     </span>
                   </td>
-                )}
 
-                <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
-                  {isCreator ? (
-                    editingReminderId === habit.id ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <input
-                          type="time"
-                          value={tempReminderTime}
-                          onChange={(e) => setTempReminderTime(e.target.value)}
-                          className="border border-gray-300 rounded-lg px-2 py-1 text-sm w-24 focus:outline-none focus:ring-1 focus:ring-black bg-white"
-                        />
-                        <button
-                          onClick={() => saveReminder(habit.id)}
-                          className="text-green-600 hover:text-green-800 text-sm font-semibold transition-colors"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingReminderId(null)}
-                          className="text-gray-500 hover:text-gray-800 text-sm font-semibold transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : reminderTimes[habit.id] ? (
-                      <button
-                        className="text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors border border-blue-100"
-                        onClick={() => startEditingReminder(habit.id)}
-                      >
-                        {reminderTimes[habit.id]}
-                      </button>
-                    ) : (
-                      <button
-                        className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors"
-                        onClick={() => startEditingReminder(habit.id)}
-                      >
-                        Set Reminder
-                      </button>
-                    )
-                  ) : (
-                    <div className="flex items-center justify-end gap-3">
-                      {reminderTimes[habit.id] ? (
-                        <>
-                          <span
-                            className={`text-sm font-semibold transition-all ${
-                              disabledReminders[habit.id]
-                                ? 'text-gray-400 line-through'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            {reminderTimes[habit.id]}
-                          </span>
-
+                  <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
+                    {isCreator ? (
+                      editingReminderId === habit.id ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <input
+                            type="time"
+                            value={tempReminderTime}
+                            onChange={(e) =>
+                              setTempReminderTime(e.target.value)
+                            }
+                            className="border border-gray-300 rounded-lg px-2 py-1 text-sm w-24 focus:outline-none focus:ring-1 focus:ring-black bg-white"
+                          />
                           <button
-                            onClick={() => toggleDisableReminder(habit.id)}
-                            className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border ${
-                              disabledReminders[habit.id]
-                                ? 'text-gray-500 bg-gray-100 border-gray-200 hover:bg-gray-200'
-                                : 'text-pink-600 bg-pink-50 border-pink-100 hover:bg-pink-100'
-                            }`}
+                            onClick={() => saveReminder(habit.id)}
+                            className="text-green-600 hover:text-green-800 text-sm font-semibold transition-colors"
                           >
-                            {disabledReminders[habit.id] ? 'Enable' : 'Disable'}
+                            Save
                           </button>
-                        </>
-                      ) : (
-                        <span className="text-gray-400 text-sm">--</span>
-                      )}
-                    </div>
-                  )}
-                </td>
-
-                <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
-                  <button
-                    onClick={() => void handleLeaderboard(habit.id)}
-                    className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors"
-                  >
-                    View Leaderboard
-                  </button>
-                </td>
-
-                <td className="px-4 py-4 text-right rounded-r-2xl border-y border-r border-transparent group-hover:border-gray-200">
-                  {isCreator ? (
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => startEdit(habit)}
-                        className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
-                      >
-                        Edit
-                      </button>
-                      {!showArchived && (
+                          <button
+                            onClick={() => setEditingReminderId(null)}
+                            className="text-gray-500 hover:text-gray-800 text-sm font-semibold transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : activeReminderTime ? (
                         <button
-                          onClick={() => void handleArchive(habit.id)}
+                          className="text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors border border-blue-100"
+                          onClick={() =>
+                            startEditingReminder(habit.id, activeReminderTime)
+                          }
+                        >
+                          {activeReminderTime}
+                        </button>
+                      ) : (
+                        <button
+                          className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors"
+                          onClick={() => startEditingReminder(habit.id)}
+                        >
+                          Set Reminder
+                        </button>
+                      )
+                    ) : (
+                      <div className="flex items-center justify-end gap-3">
+                        {activeReminderTime ? (
+                          <>
+                            <span
+                              className={`text-sm font-semibold transition-all ${
+                                disabledReminders[habit.id]
+                                  ? 'text-gray-400 line-through'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {activeReminderTime}
+                            </span>
+                            <button
+                              onClick={() => toggleDisableReminder(habit.id)}
+                              className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border ${
+                                disabledReminders[habit.id]
+                                  ? 'text-gray-500 bg-gray-100 border-gray-200 hover:bg-gray-200'
+                                  : 'text-pink-600 bg-pink-50 border-pink-100 hover:bg-pink-100'
+                              }`}
+                            >
+                              {disabledReminders[habit.id]
+                                ? 'Enable'
+                                : 'Disable'}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-gray-400 text-sm">--</span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200 text-right">
+                    <button
+                      onClick={() => void handleLeaderboard(habit.id)}
+                      className="text-sm text-gray-500 hover:text-gray-800 font-medium px-2 py-1 transition-colors"
+                    >
+                      View Leaderboard
+                    </button>
+                  </td>
+
+                  <td className="px-4 py-4 text-right rounded-r-2xl border-y border-r border-transparent group-hover:border-gray-200">
+                    {isCreator ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => startEdit(habit)}
                           className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
                         >
-                          Archive
+                          Edit
                         </button>
-                      )}
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/main-creator/teams-creator/habits-creator/${teamId}/logs/${habit.id}`,
-                            {
-                              state: {
-                                habitType: habit.habitType,
-                                habitName: habit.name,
-                              },
-                            }
-                          )
-                        }
-                        className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
-                      >
-                        Logs
-                      </button>
-                      <button
-                        onClick={() => void handleDelete(habit.id)}
-                        className="text-gray-500 hover:text-red-600 text-sm font-medium px-2 py-1 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-end">
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/main-member/teams-member/habits-member/${teamId}/logs/${habit.id}`,
-                            {
-                              state: {
-                                habitType: habit.habitType,
-                                habitName: habit.name,
-                              },
-                            }
-                          )
-                        }
-                        className="text-pink-400 bg-pink-50 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border border-pink-100"
-                      >
-                        View
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+                        {!showArchived && (
+                          <button
+                            onClick={() => void handleArchive(habit.id)}
+                            className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
+                          >
+                            Archive
+                          </button>
+                        )}
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/main-creator/teams-creator/habits-creator/${teamId}/logs/${habit.id}`,
+                              {
+                                state: {
+                                  habitType: habit.habitType,
+                                  habitName: habit.name,
+                                },
+                              }
+                            )
+                          }
+                          className="text-gray-500 hover:text-black text-sm font-medium px-2 py-1 transition-colors"
+                        >
+                          Logs
+                        </button>
+                        <button
+                          onClick={() => void handleDelete(habit.id)}
+                          className="text-gray-500 hover:text-red-600 text-sm font-medium px-2 py-1 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-end">
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/main-member/teams-member/habits-member/${teamId}/logs/${habit.id}`,
+                              {
+                                state: {
+                                  habitType: habit.habitType,
+                                  habitName: habit.name,
+                                },
+                              }
+                            )
+                          }
+                          className="text-pink-400 bg-pink-50 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors border border-pink-100"
+                        >
+                          View
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 

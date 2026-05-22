@@ -21,6 +21,7 @@ import { HabitLogs } from './features/dashboards/teams/HabitLogs';
 import { CreateHabit } from './features/dashboards/teams/CreateHabit';
 import { MembersList } from './features/dashboards/teams/MembersList';
 import { LeaderBoard } from './features/dashboards/teams/LeaderBoard';
+import { useHabitReminders } from './hooks/useHabitReminder';
 
 function App() {
   const initWelcome = useNotificationStore((state) => state.initWelcome);
@@ -28,7 +29,7 @@ function App() {
   useEffect(() => {
     initWelcome();
   }, [initWelcome]);
-
+  useHabitReminders();
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
