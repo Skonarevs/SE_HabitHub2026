@@ -387,12 +387,12 @@ export const HabitsList = () => {
                       <span className="font-semibold text-gray-700">
                         {habit.name}
                       </span>
-                      {activeReminderTime && (
+                      {/* {activeReminderTime && (
                         <span className="flex items-center gap-1 text-xs font-bold text-blue-600 mt-1">
                           <Clock size={12} />
                           {activeReminderTime}
                         </span>
-                      )}
+                      )} */}
                     </div>
                   </td>
 
