@@ -176,9 +176,9 @@ namespace HabitHub.ApiTests
             return habit.Id;
         }
 
-        // -----------------------------------------------------------------------
-        // CreateTeam POST /teams
-        // -----------------------------------------------------------------------
+
+        // CreateTeam POST /teams -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task CreateTeam_ShouldReturn401_WhenNotAuthenticated()
@@ -230,9 +230,9 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // GetTeam GET /teams/{teamId}
-        // -----------------------------------------------------------------------
+
+        // GetTeam GET /teams/{teamId} -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task GetTeam_ShouldReturn401_WhenNotAuthenticated()
@@ -284,9 +284,11 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // GenerateInviteCode POST /teams/{teamId}/invite-codes
-        // -----------------------------------------------------------------------
+
+
+ 
+        // GenerateInviteCode POST /teams/{teamId}/invite-codes -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task GenerateInviteCode_ShouldReturn401_WhenNotAuthenticated()
@@ -340,9 +342,9 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // JoinTeam POST /teams/join
-        // -----------------------------------------------------------------------
+
+        // JoinTeam POST /teams/join -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task JoinTeam_ShouldReturn401_WhenNotAuthenticated()
@@ -401,9 +403,11 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // KickUser POST /teams/{teamId}/members/{memberId}/kick
-        // -----------------------------------------------------------------------
+
+
+
+        // KickUser POST /teams/{teamId}/members/{memberId}/kick -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task KickUser_ShouldReturn401_WhenNotAuthenticated()
@@ -471,9 +475,11 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // LeaveTeam POST /teams/{teamId}/leave
-        // -----------------------------------------------------------------------
+
+
+        // LeaveTeam POST /teams/{teamId}/leave -----------------------------------------------------------------------
+
+
 
         [Fact]
         public async Task LeaveTeam_ShouldReturn401_WhenNotAuthenticated()
@@ -522,9 +528,9 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // DeleteTeam DELETE /teams/{teamId}
-        // -----------------------------------------------------------------------
+
+        // DeleteTeam DELETE /teams/{teamId} -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task DeleteTeam_ShouldReturn401_WhenNotAuthenticated()
@@ -572,9 +578,9 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // CreateHabit POST /teams/{teamId}/habits
-        // -----------------------------------------------------------------------
+
+
+        // CreateHabit POST /teams/{teamId}/habits -----------------------------------------------------------------------
 
         [Fact]
         public async Task CreateHabit_ShouldReturn401_WhenNotAuthenticated()
@@ -658,9 +664,9 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // GetArchivedHabits GET /teams/{teamId}/habits?state=archived
-        // -----------------------------------------------------------------------
+
+        // GetArchivedHabits GET /teams/{teamId}/habits?state=archived -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task GetArchivedHabits_ShouldReturn401_WhenNotAuthenticated()

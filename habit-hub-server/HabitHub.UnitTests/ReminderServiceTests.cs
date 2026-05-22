@@ -23,9 +23,7 @@ namespace HabitHub.UnitTests
 
     public class ReminderServiceTests
     {
-        // -----------------------------------------------------------------------
-        // Helpers
-        // -----------------------------------------------------------------------
+        //helpers
 
         private AppDbContext CreateDb()
         {
@@ -93,9 +91,8 @@ namespace HabitHub.UnitTests
             return (creator.Id, team.Id, habit.Id);
         }
 
-        /// <summary>
-        /// Seeds a TeamMember with an active membership in the given team.
-        /// </summary>
+
+        // Seeds a TeamMember with an active membership in the given team.
         private async Task<Guid> SeedMemberAsync(AppDbContext db, Guid teamId)
         {
             var member = new TeamMember
@@ -119,9 +116,7 @@ namespace HabitHub.UnitTests
             return member.Id;
         }
 
-        // -----------------------------------------------------------------------
-        // SetReminderAsync
-        // -----------------------------------------------------------------------
+        // SetReminderAsync -----------------------------------------------------------------------
 
         [Fact]
         public async Task SetReminder_ShouldThrowNotFound_WhenHabitDoesNotExist()
@@ -193,9 +188,8 @@ namespace HabitHub.UnitTests
             Assert.Equal(new TimeOnly(9, 0, 0), reminder.Time);
         }
 
-        // -----------------------------------------------------------------------
-        // ChangeReminderEnabledAsync
-        // -----------------------------------------------------------------------
+
+        // ChangeReminderEnabledAsync -----------------------------------------------------------------------
 
         [Fact]
         public async Task ChangeReminderEnabled_ShouldThrowNotFound_WhenHabitDoesNotExist()
@@ -296,9 +290,10 @@ namespace HabitHub.UnitTests
             Assert.True(reminder.Enabled);
         }
 
-        // -----------------------------------------------------------------------
-        // SendPendingRemindersAsync
-        // -----------------------------------------------------------------------
+
+
+        // SendPendingRemindersAsync -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task SendPendingReminders_ShouldNotSendEmail_WhenNoActiveHabitsWithReminders()

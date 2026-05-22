@@ -116,9 +116,10 @@ namespace HabitHub.UnitTests
             return code.Code;
         }
 
-        // -----------------------------------------------------------------------
-        // CreateTeamAsync
-        // -----------------------------------------------------------------------
+
+
+
+        // CreateTeamAsync -----------------------------------------------------------------------
 
         [Fact]
         public async Task CreateTeam_ShouldThrowForbidden_WhenUserIsNotACreator()
@@ -184,9 +185,10 @@ namespace HabitHub.UnitTests
             Assert.Equal(MembershipStatus.Active, membership.Status);
         }
 
-        // -----------------------------------------------------------------------
-        // CreateHabitAsync
-        // -----------------------------------------------------------------------
+
+
+        // CreateHabitAsync -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task CreateHabit_ShouldThrowNotFound_WhenTeamDoesNotExist()
@@ -321,9 +323,10 @@ namespace HabitHub.UnitTests
             Assert.Equal("km", result.Unit);
         }
 
-        // -----------------------------------------------------------------------
-        // GetTeamAsync
-        // -----------------------------------------------------------------------
+
+        // GetTeamAsync -----------------------------------------------------------------------
+
+
 
         [Fact]
         public async Task GetTeam_ShouldThrowNotFound_WhenTeamDoesNotExist()
@@ -363,9 +366,11 @@ namespace HabitHub.UnitTests
             Assert.Equal("Test Team", result.Name);
         }
 
-        // -----------------------------------------------------------------------
-        // GenerateInviteCodeAsync
-        // -----------------------------------------------------------------------
+
+
+        // GenerateInviteCodeAsync -----------------------------------------------------------------------
+
+
 
         [Fact]
         public async Task GenerateInviteCode_ShouldThrowNotFound_WhenTeamDoesNotExist()
@@ -405,9 +410,10 @@ namespace HabitHub.UnitTests
             Assert.True(result.ExpiryDate > DateTime.UtcNow);
         }
 
-        // -----------------------------------------------------------------------
-        // JoinTeamAsync
-        // -----------------------------------------------------------------------
+
+
+        // JoinTeamAsync -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task JoinTeam_ShouldThrowNotFound_WhenInviteCodeDoesNotExist()
@@ -469,9 +475,9 @@ namespace HabitHub.UnitTests
             Assert.Equal(MembershipStatus.Active, membership.Status);
         }
 
-        // -----------------------------------------------------------------------
-        // KickMemberAsync
-        // -----------------------------------------------------------------------
+
+        // KickMemberAsync -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task KickMember_ShouldThrowNotFound_WhenTeamDoesNotExist()
@@ -540,9 +546,10 @@ namespace HabitHub.UnitTests
             Assert.NotNull(membership.LeftAt);
         }
 
-        // -----------------------------------------------------------------------
-        // LeaveTeamAsync
-        // -----------------------------------------------------------------------
+
+        // LeaveTeamAsync -----------------------------------------------------------------------
+
+
 
         [Fact]
         public async Task LeaveTeam_ShouldThrowNotFound_WhenTeamDoesNotExist()
@@ -596,9 +603,10 @@ namespace HabitHub.UnitTests
             Assert.NotNull(membership.LeftAt);
         }
 
-        // -----------------------------------------------------------------------
-        // DeleteTeamAsync
-        // -----------------------------------------------------------------------
+
+
+        // DeleteTeamAsync-----------------------------------------------------------------------
+
 
         [Fact]
         public async Task DeleteTeam_ShouldThrowNotFound_WhenTeamDoesNotExist()
@@ -662,9 +670,11 @@ namespace HabitHub.UnitTests
             Assert.Empty(db.Memberships.Where(m => m.TeamId == teamId));
         }
 
-        // -----------------------------------------------------------------------
-        // GetArchivedHabitsAsync
-        // -----------------------------------------------------------------------
+
+
+        // GetArchivedHabitsAsync-----------------------------------------------------------------------
+
+
 
         [Fact]
         public async Task GetArchivedHabits_ShouldThrowNotFound_WhenTeamDoesNotExist()

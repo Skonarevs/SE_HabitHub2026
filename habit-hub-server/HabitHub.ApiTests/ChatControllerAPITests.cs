@@ -14,9 +14,7 @@ namespace HabitHub.ApiTests
     {
         public ChatControllerApiTests(WebApplicationFactory<Program> factory) : base(factory) { }
 
-        // -----------------------------------------------------------------------
-        // Seed helpers
-        // -----------------------------------------------------------------------
+        //helpers
 
         /// <summary>
         /// Seeds a TeamCreator with a session, a Team with a chat,
@@ -138,9 +136,9 @@ namespace HabitHub.ApiTests
             return message.Id;
         }
 
-        // -----------------------------------------------------------------------
-        // GetMessages GET /teams/{teamId}/chat/messages
-        // -----------------------------------------------------------------------
+
+        // GetMessages GET /teams/{teamId}/chat/messages -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task GetMessages_ShouldReturn401_WhenNotAuthenticated()
@@ -220,9 +218,8 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // SendMessage POST /teams/{teamId}/chat/messages
-        // -----------------------------------------------------------------------
+
+        // SendMessage POST /teams/{teamId}/chat/messages -----------------------------------------------------------------------
 
         [Fact]
         public async Task SendMessage_ShouldReturn401_WhenNotAuthenticated()
@@ -303,9 +300,9 @@ namespace HabitHub.ApiTests
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        // -----------------------------------------------------------------------
-        // DeleteMessage DELETE /teams/{teamId}/chat/messages/{messageId}
-        // -----------------------------------------------------------------------
+
+        // DeleteMessage DELETE /teams/{teamId}/chat/messages/{messageId} -----------------------------------------------------------------------
+
 
         [Fact]
         public async Task DeleteMessage_ShouldReturn401_WhenNotAuthenticated()
