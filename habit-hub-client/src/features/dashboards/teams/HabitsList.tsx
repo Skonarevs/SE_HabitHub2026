@@ -102,7 +102,6 @@ export const HabitsList = () => {
 
   const startEditingReminder = (habitId: string, currentSavedTime?: string) => {
     setEditingReminderId(habitId);
-    // Use the locally edited time, or fallback to the database time
     setTempReminderTime(reminderTimes[habitId] || currentSavedTime || '');
   };
 
@@ -375,7 +374,6 @@ export const HabitsList = () => {
 
           <tbody>
             {habits.map((habit) => {
-              // Combine local state and database state for the reminder time
               const activeReminderTime =
                 reminderTimes[habit.id] ?? habit.reminderTime;
 
@@ -384,7 +382,6 @@ export const HabitsList = () => {
                   key={habit.id}
                   className="bg-gray-50 hover:bg-gray-100 transition-colors group"
                 >
-                  {/* ✅ FIXED: Name Column with Clock badge for everyone */}
                   <td className="px-4 py-4 rounded-l-2xl border-y border-l border-transparent group-hover:border-gray-200">
                     <div className="flex flex-col">
                       <span className="font-semibold text-gray-700">
@@ -411,7 +408,6 @@ export const HabitsList = () => {
                     </td>
                   )}
 
-                  {/* ✅ FIXED: Proper End Date column for both members and creators */}
                   <td className="px-4 py-4 border-y border-transparent group-hover:border-gray-200">
                     <span className="text-gray-500 text-sm">
                       {habit.expiryDate
