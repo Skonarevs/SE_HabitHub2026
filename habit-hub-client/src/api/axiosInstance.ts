@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://habithub-backend-dndna4fxckd9epby.polandcentral-01.azurewebsites.net',
+  baseURL: 'http://localhost:5000',
 });
 
 api.interceptors.request.use((config) => {

@@ -357,7 +357,7 @@ namespace HabitHub.API.Services
             return habits;
         }
 
-        private HabitResponseDto MapToHabitResponse(Habit habit)
+        private static HabitResponseDto MapToHabitResponse(Habit habit)
         {
             return new HabitResponseDto
             {
